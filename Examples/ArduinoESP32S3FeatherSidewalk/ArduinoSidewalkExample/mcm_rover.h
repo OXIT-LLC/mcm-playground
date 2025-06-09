@@ -144,6 +144,8 @@ class MCM {
     int8_t rssi;
     uint8_t snr;
     uint16_t seq_port;
+    uint8_t join_failure_reason = 0;
+    bool is_join_failure = false;
     bool is_debug_enabled = false;
     bool _context_mgr_is_joined_cmd_received = false;
     bool _context_mgr_is_mcm_reset;
@@ -203,6 +205,10 @@ public:
     void set_host_app_version(ver_type_1_t version);
     void retrieveLibraryVersions(ver_type_1_t *mcm_rover_lib_ver, ver_type_1_t *c_lib_ver);
     MCM_STATUS process_fw_update();
+    bool is_join_failure_available();
+    uint8_t get_join_failure_data();
+    void set_join_failure_data(uint8_t failure_reason, bool available);
+    void get_join_failure_info(uint8_t *failure_reason);
 
 };
 

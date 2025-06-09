@@ -144,6 +144,8 @@ class MCM {
     int8_t rssi;
     uint8_t snr;
     uint16_t seq_port;
+    uint8_t join_failure_reason = 0;
+    bool is_join_failure = false;
     bool is_debug_enabled = false;
     bool _context_mgr_is_joined_cmd_received = false;
     bool _context_mgr_is_mcm_reset;
@@ -208,6 +210,10 @@ public:
     MCM_STATUS req_lorawan_dev_time(void);
     MCM_STATUS get_gps_time(uint32_t *p_gps_time); 
     MCM_STATUS get_last_dl_stats(get_last_dl_stats_t *p_last_dl_stats);
+    bool is_join_failure_available();
+    uint8_t get_join_failure_data();
+    void set_join_failure_data(uint8_t failure_reason, bool available);
+    void get_join_failure_info(uint8_t *failure_reason);
 };
 
 /**********************************************************************************************************

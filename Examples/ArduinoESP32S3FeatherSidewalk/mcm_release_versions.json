@@ -2,7 +2,7 @@
   "release_date": "2025-03-21",
   "versions": {
     "mcm": {
-      "application": "0.5.6",
+      "application": "0.5.8",
       "bootloader": "0.1.3",
       "sdk": {
         "simplicity_studio": "SV5.8.0.1",
@@ -16,7 +16,7 @@
       }
     },
     "host": {
-      "application": "0.5.0",
+      "application": "0.6.0",
       "lib_mcm_rover": "0.3.0",
       "lib_api_processor": "0.2.0"
     }

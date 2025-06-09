@@ -107,7 +107,14 @@ typedef struct
     mrover_uplink_event_type_t tx_status;
 } get_tx_status_t;
 
-
+/**
+ * @brief Structure to get the join failure status. 
+ * This is the data for the event 'GET_EVENT_JOIN_FAILURE
+ * 
+ */typedef struct
+{
+    uint8_t failure_reason;
+} get_event_failure_reason_t;
 
 
 /**
@@ -191,6 +198,7 @@ typedef union
     get_evt_class_switch_data_t class_switch_data;
     get_seg_file_status_t download_segment_data;
     get_evt_mac_time_t mac_time;
+    get_event_failure_reason_t failure_reason;
 } get_event_cb_value_t;
 
 
@@ -938,6 +946,14 @@ get_event_code_t mcm_helper_get_event_code(const api_processor_response_t *res);
  * @return The event TX status mrover_uplink_event_type_t
  */
 mrover_uplink_event_type_t mcm_helper_get_event_tx_status(const api_processor_response_t *res);
+
+/**
+ * @brief Get the join failure reason from the API processor response
+ * 
+ * @param[in] res Pointer to the API processor response
+ * @return The join failure reason bitmask. Check JOIN_FAIL_* values in commands_defs.h
+ */
+uint8_t mcm_helper_get_join_failure_reason(const api_processor_response_t *res);
 
 /**
  * @brief Get the device EUI from the API processor response

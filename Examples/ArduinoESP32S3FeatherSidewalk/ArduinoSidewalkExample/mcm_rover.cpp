@@ -238,15 +238,34 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
         case MODEM_EVENT_JOINFAIL:
         {
             Serial.printf("MODEM_EVENT_JOINFAIL\n");
+            uint8_t failure_reason = mcm_helper_get_join_failure_reason(mcm_response);
+            
+            // Store the failure reason in the MCM instance for later retrieval
+            curr_instance->set_join_failure_data(failure_reason, true);
+            
             if (COMMAND_TYPE_LORAWAN == mcm_helper_get_command_type(mcm_response))
             {
-                if (curr_instance->get_is_debug_enabled())
-                    Serial.printf("Join fail event occurred\n");
+                if (curr_instance->get_is_debug_enabled()) {
+                    // failure reason not used in case of lorawan should always be 0
+                    Serial.printf("Join fail event occurred with reason: 0x%02X\n", failure_reason);
+                }
             }
             else if (COMMAND_TYPE_SIDEWALK == mcm_helper_get_command_type(mcm_response))
             {
-                if (curr_instance->get_is_debug_enabled())
-                    Serial.printf("Sidewalk time sync fail event\n");
+                if (curr_instance->get_is_debug_enabled()) {
+                    Serial.printf("Sidewalk time sync fail event with reason: 0x%02X\n", failure_reason);
+                    if (failure_reason & JOIN_FAIL_REG) {
+                        Serial.printf("  - Registration failed\n");
+                    }
+                    if (failure_reason & JOIN_FAIL_TIME_SYNC) {
+                        Serial.printf("  - Time sync failed\n");
+                    }
+                    if (failure_reason & JOIN_FAIL_LINK) {
+                        Serial.printf("  - Link failed\n");
+                    }                    if (failure_reason == JOIN_FAIL_NONE) {
+                        Serial.printf("  - No specific reason\n");
+                    }
+                }
             }
             curr_instance->set_is_joined_network(false);
         }
@@ -1322,6 +1341,24 @@ bool MCM::get_context_mgr_is_mcm_reset()
     return return_value;
 }
 
+bool MCM::is_join_failure_available()
+{
+    return this->is_join_failure;
+}
+
+uint8_t MCM::get_join_failure_data()
+{
+    uint8_t failure_reason = this->join_failure_reason;
+    this->is_join_failure = false;  // Reset the flag after retrieving the data
+    return failure_reason;
+}
+
+void MCM::set_join_failure_data(uint8_t failure_reason, bool available)
+{
+    this->join_failure_reason = failure_reason;
+    this->is_join_failure = available;
+}
+
 void MCM::hw_reset()
 {
     Serial.printf("hw_reset\n");
@@ -1540,4 +1577,9 @@ MCM_STATUS MCM::process_fw_update()
         Serial.println("Host firmware present - triggering host firmware update");
         return this->start_file_transfer(seg_file_status.fw_ver);
     }
+}
+
+void MCM::get_join_failure_info(uint8_t *failure_reason)
+{
+    *failure_reason = this->get_join_failure_data();
 }

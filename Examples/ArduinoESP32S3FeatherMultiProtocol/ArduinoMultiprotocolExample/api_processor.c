@@ -102,7 +102,7 @@ static api_processor_status_t api_processor_handle_request_uplink(mcm_module_hdl
 static api_processor_status_t api_processor_parse_get_gps_time(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_procesor_parse_lorawan_mac_time(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_parse_last_dl_stats(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
-
+static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hdl_t *mcm_module,uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 
 
 
@@ -338,6 +338,7 @@ static api_processor_status_t api_processor_parse_get_event(mcm_module_hdl_t *mc
 
         case MODEM_EVENT_JOINFAIL:
             TRACE_INFO("MODEM_EVENT_JOINFAIL\n");
+            return_status = api_processor_get_event_join_failure(mcm_module,&data[2],len, p_response);
             break;
 
         case MODEM_EVENT_TIME:
@@ -1126,6 +1127,11 @@ uint32_t mcm_helper_get_gps_time(const api_processor_response_t *res)
 mrover_lorawan_mac_event_t mcm_helper_get_mac_time_event(const api_processor_response_t *res)
 {
     return res->cmd_response_data.get_event_data.get_event_data_value.mac_time.mac_event;
+}
+
+inline uint8_t mcm_helper_get_join_failure_reason(const api_processor_response_t *res)
+{
+    return res->cmd_response_data.get_event_data.get_event_data_value.failure_reason.failure_reason;
 }
 
 
@@ -2819,6 +2825,45 @@ api_processor_status_t api_processor_cmd_get_last_dl_stats(mcm_module_hdl_t *mcm
         return_status = API_PROCESSOR_SUCCESS;
 
     } while (0);
+
+    return return_status;
+}
+
+static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    do
+    {
+        if (data == NULL || p_response == NULL)
+        {
+            TRACE_INFO("In get event join failure data or response is null\n");
+            break;
+        }
+        if (len != 1)
+        {
+            TRACE_INFO("In get event join failure data length is not 1\n");
+            break;
+        }
+
+        // Store the raw failure reason value
+        p_response->cmd_response_data.get_event_data.get_event_data_value.failure_reason.failure_reason = data[0];
+
+        // Log the failure reasons based on the bitmask
+        if (data[0] & JOIN_FAIL_REG) {
+            TRACE_INFO("Join failure: Registration failed\n");
+        }
+        if (data[0] & JOIN_FAIL_TIME_SYNC) {
+            TRACE_INFO("Join failure: Time sync failed\n");
+        }
+        if (data[0] & JOIN_FAIL_LINK) {
+            TRACE_INFO("Join failure: Link failed\n");
+        }
+        if (data[0] == JOIN_FAIL_NONE) {
+            TRACE_INFO("Join failure: No specific reason\n");
+        }
+
+        return_status = API_PROCESSOR_SUCCESS;
+    }while(0);
 
     return return_status;
 }
