@@ -670,8 +670,25 @@ void run_state_machine()
         }
 
         case STATE_JOIN_NETWORK: {
-            if (initiate_network_join())
-            {
+            // Check for join failure
+            // note: we are not taking join failure actions here, just printing the reason
+            if (mcm.is_join_failure_available()) {
+                uint8_t failure_reason;
+                mcm.get_join_failure_info(&failure_reason);
+                
+                Serial.println("Join failure detected. Checking failure reasons:");
+                
+                if (failure_reason & JOIN_FAIL_REG) {
+                    Serial.println("- Registration failure: Device registration failed");
+                }
+                if (failure_reason & JOIN_FAIL_TIME_SYNC) {
+                    Serial.println("- Time sync failure: Network time synchronization failed");
+                }
+                if (failure_reason & JOIN_FAIL_LINK) {
+                    Serial.println("- Link failure: Network link was lost");
+                }
+            } else if (initiate_network_join()) {
+			 
                 set_state(STATE_READ_SENSOR);
             }
             break;

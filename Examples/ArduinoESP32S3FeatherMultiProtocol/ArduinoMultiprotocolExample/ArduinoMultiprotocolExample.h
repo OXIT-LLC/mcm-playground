@@ -95,7 +95,7 @@
 // Manufacturing mode and version information
 #define ENABLE_MANUFACTURING_MODE 0
 #define HOST_APP_VERSION_MAJOR 0x00
-#define HOST_APP_VERSION_MINOR 0x06
+#define HOST_APP_VERSION_MINOR 0x07
 #define HOST_APP_VERSION_PATCH 0x00
 
 /******************************************************************************

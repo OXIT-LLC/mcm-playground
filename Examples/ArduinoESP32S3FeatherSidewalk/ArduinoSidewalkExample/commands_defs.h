@@ -276,6 +276,16 @@ typedef enum {
     MROVER_LORAWAN_CLASS_C       = 0x02
 } mrover_lorawan_class_t;
 
+/**
+ * @brief Join failure reasons that can be combined using bitmasks
+ */
+typedef enum {
+    JOIN_FAIL_NONE        = 0x00,  // No failure
+    JOIN_FAIL_REG         = 0x01,  // Registration went 0→1
+    JOIN_FAIL_TIME_SYNC   = 0x02,  // Time sync went 0→1
+    JOIN_FAIL_LINK        = 0x04   // Link went joined→0
+} join_fail_reason_t;
+
 
 /**********************************************************************************************************
  * ExPORTED VARIABLES
