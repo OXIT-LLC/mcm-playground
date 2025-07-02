@@ -273,6 +273,8 @@ typedef union
     get_ver_data_t ver_info;
     get_seg_file_status_t seg_file_status;
     get_last_dl_stats_t last_dl_stats;
+    uint16_t next_uplink_mtu;
+    uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
 } cmd_response_data_t;
 
 /**
@@ -904,6 +906,15 @@ api_processor_status_t api_processor_cmd_request_lorawan_dev_time(mcm_module_hdl
  */
 api_processor_status_t api_processor_cmd_get_last_dl_stats(mcm_module_hdl_t *mcm_module);
 
+
+/**
+ * @brief Constructs and sends a command to get the next uplink MTU
+ * 
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
+ */
+api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module);
+
 /***********************************Helper Functions Prototypes *********************************/
 
 
@@ -1050,6 +1061,14 @@ void mcm_helper_get_seg_file_status(const api_processor_response_t *res, get_seg
  * @return The LoRaWAN MAC time event
  */
 mrover_lorawan_mac_event_t mcm_helper_get_mac_time_event(const api_processor_response_t *res);
+
+/**
+ * @brief return the next uplink MTU
+ * 
+ * @param res Pointer to the API processor response
+ * @return next uplink MTU
+ */
+uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res);
 
 #ifdef __cplusplus
 }

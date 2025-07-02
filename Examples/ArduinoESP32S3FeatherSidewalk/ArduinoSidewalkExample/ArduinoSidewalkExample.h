@@ -121,5 +121,21 @@ typedef struct {
  * @param new_mode The new connection mode to switch to.
  */
 void switch_protocol_mode(ConnectionMode new_mode);
+/**
+ * @brief query next uplink mtu from modem via a refresh command
+ * 
+ * @param mtu Pointer to store the retrieved MTU size
+ * @return int 0 on success, non-zero on failure
+ */
+
+int app_queryNextUplink_mtu(uint16_t *mtu);
+
+/**
+ * @brief Retrieves the cached next uplink MTU size from the modem. Only queries the modem if the cached value is altered.
+ *
+ * @param[out] mtu Pointer to store the retrieved MTU size
+ * @return int 0 on success, non-zero on failure
+ */
+int app_getCachedMaxUplink_mtu(uint16_t *mtu);
 
 #endif // ARDUINO_SIDEWALK_EXAMPLE_H

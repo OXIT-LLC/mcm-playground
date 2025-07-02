@@ -152,6 +152,7 @@ class MCM {
     void process_received_data();
     
 public:
+    uint16_t nextUplink_mtu;
     ver_type_1_t host_version;
     YModem ymodem;
     bool is_new_firmware_downloaded = false;
@@ -209,7 +210,7 @@ public:
     uint8_t get_join_failure_data();
     void set_join_failure_data(uint8_t failure_reason, bool available);
     void get_join_failure_info(uint8_t *failure_reason);
-
+    MCM_STATUS get_next_uplink_mtu(uint16_t *mtu);
 };
 
 /**********************************************************************************************************

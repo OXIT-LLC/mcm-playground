@@ -165,4 +165,21 @@ int request_lorawan_time_sync(void);
  */
 int app_get_dl_stats(get_last_dl_stats_t *p_last_dl_stats);
 
+/**
+ * @brief query next uplink mtu from modem via a refresh command
+ * 
+ * @param mtu Pointer to store the retrieved MTU size
+ * @return int 0 on success, non-zero on failure
+ */
+
+int app_queryNextUplink_mtu(uint16_t *mtu);
+
+/**
+ * @brief Retrieves the cached next uplink MTU size from the modem. Only queries the modem if the cached value is altered.
+ *
+ * @param[out] mtu Pointer to store the retrieved MTU size
+ * @return int 0 on success, non-zero on failure
+ */
+int app_getCachedMaxUplink_mtu(uint16_t *mtu);
+
 #endif // LRWAN_SIDEWALK_EX_H

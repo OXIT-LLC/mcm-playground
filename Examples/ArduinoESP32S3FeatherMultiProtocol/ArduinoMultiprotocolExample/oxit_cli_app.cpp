@@ -189,6 +189,15 @@ hal_error_code_t cli_receive_byte(uint8_t *p_u8_rx_byte);
 
 void helper_print_hex_array(const uint8_t* arr, size_t len);
 
+/**
+ * @brief Get the next uplink mtu callback object
+ * 
+ * @param pu8_input_value The input value (unused for this command).
+ * @param pfun_uart_tx  Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
+
 /******************************************************************************/
 /* Global Variable Definition */
 /******************************************************************************/
@@ -286,6 +295,12 @@ cli_command_t cli_commands[] = {{
                                                 CLI_APP_NAME" get_dl_stats <enter>",
                                                 "Retrieve the last downlink statistics",
                                                 get_dl_stats_callback,
+                                            },
+                                            {
+                                                "get_next_uplink_mtu",
+                                                CLI_APP_NAME" get_next_uplink_mtu <enter>",
+                                                "To get next uplink MTU size",
+                                                get_next_uplink_mtu_callback,
                                             },
                                             };
 
@@ -671,5 +686,26 @@ static int get_dl_stats_callback(const char *pu8_input_value, cli_send_bytes_t p
                   "\tTimestamp: %lu\n",
                   dl_stats.protocol_type, dl_stats.rssi, dl_stats.snr, dl_stats.timestamp);
     
+    return 0;
+}
+
+/**
+ * @brief Get the next uplink mtu callback object
+ * 
+ * @param pu8_input_value The input value (unused for this command).
+ * @param pfun_uart_tx  Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx)
+{
+    uint16_t mtu = 0;
+    
+    int status = app_queryNextUplink_mtu(&mtu);
+    if (status != 0) {
+        Serial.println("Error: Failed to get next uplink MTU");
+        return 1;
+    }
+    Serial.print("Next Uplink MTU: ");
+    Serial.println(mtu);
     return 0;
 }

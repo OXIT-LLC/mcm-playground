@@ -191,6 +191,7 @@ static bool is_valid_command_code(uint16_t u16_command_code)
     case MROVER_CC_FILE_STATUS:
     case MROVER_CC_TRIGGER_FW_UPDATE:
     case MROVER_CC_GET_LAST_DL_STATS:
+    case MROVER_CC_GET_NEXT_UPLINK_MTU:
         b_is_valid_command_code = true;
         
         break;
