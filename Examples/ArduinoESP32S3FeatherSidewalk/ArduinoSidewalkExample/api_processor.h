@@ -65,7 +65,7 @@ extern "C" {
  *       the patch version number is incremented for bug fixes.
  */
 #define API_PROCESSOR_LIB_MAJOR_VERSION 0
-#define API_PROCESSOR_LIB_MINOR_VERSION 2
+#define API_PROCESSOR_LIB_MINOR_VERSION 3
 #define API_PROCESSOR_LIB_PATCH_VERSION 0
 
 /**********************************************************************************************************
@@ -256,6 +256,8 @@ typedef union
     const uint8_t* dev_eui;
     const uint8_t* join_eui;
     get_seg_file_status_t seg_file_status;
+    uint16_t next_uplink_mtu;
+    uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
 } cmd_response_data_t;
 
 /**
@@ -859,7 +861,13 @@ api_processor_status_t api_processor_cmd_get_seg_file_transfer_status(mcm_module
  */
 api_processor_status_t api_processor_cmd_trigger_fw_update(mcm_module_hdl_t *mcm_module, ver_type_1_t version);
 
-
+/**
+ * @brief Constructs and sends a command to get the next uplink MTU
+ * 
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
+ */
+api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module);
 
 /***********************************Helper Functions Prototypes *********************************/
 
@@ -976,6 +984,15 @@ get_seg_file_status_t mcm_helper_get_event_seg_down(const api_processor_response
 mrover_lorawan_class_t mcm_helper_get_device_class(const api_processor_response_t *res);
 
 void mcm_helper_get_seg_file_status(const api_processor_response_t *res, get_seg_file_status_t *seg_file_status);
+
+/**
+ * @brief return the next uplink MTU
+ * 
+ * @param res Pointer to the API processor response
+ * @return next uplink MTU
+ */
+uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res);
+
 
 #ifdef __cplusplus
 }

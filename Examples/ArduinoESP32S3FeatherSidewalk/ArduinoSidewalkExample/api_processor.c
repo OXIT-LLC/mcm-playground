@@ -86,6 +86,7 @@ static api_processor_status_t api_processor_parse_get_event_seg(mcm_module_hdl_t
 static api_processor_status_t api_processor_parse_get_file_status(mcm_module_hdl_t *mcm_module,uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_handle_request_uplink(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hdl_t *mcm_module,uint8_t *data, uint16_t len, api_processor_response_t *p_response);
+static api_processor_status_t api_processor_parse_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 
 /******************************************************************************
  * STATIC FUNCTIONS
@@ -200,7 +201,10 @@ static api_processor_status_t api_processor_parse_response_frame(mcm_module_hdl_
         break;
         case MROVER_CC_FILE_STATUS:
         return_status = api_processor_parse_get_file_status(mcm_module, &data[6], payload_len, p_response);
-        break;
+        break;        
+        case MROVER_CC_GET_NEXT_UPLINK_MTU:     
+            return_status = api_processor_parse_get_next_uplink_mtu(mcm_module, &data[6], payload_len, p_response);
+            break;
 
         default:
             TRACE_INFO("Wrong type of the command code received\n");
@@ -965,6 +969,10 @@ void mcm_helper_get_seg_file_status(const api_processor_response_t *res, get_seg
 inline uint8_t mcm_helper_get_join_failure_reason(const api_processor_response_t *res)
 {
     return res->cmd_response_data.get_event_data.get_event_data_value.failure_reason.failure_reason;
+}
+
+inline uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res) {
+    return res->cmd_response_data.next_uplink_mtu;
 }
 /******************************************************************************
  * Function Definitions
@@ -2475,17 +2483,15 @@ static api_processor_status_t api_processor_handle_request_uplink(mcm_module_hdl
     api_processor_status_t return_status = API_PROCESSOR_ERROR;
 
     // Basic sanity checks
-    if (data == NULL || len < 1) {
+    if (data == NULL || len < 2) {
         TRACE_INFO("Invalid data for uplink request\n");
         return API_PROCESSOR_INVALID_PARAMETERS;
     }
 
-    // Debug print to indicate the start of processing the uplink request
-    TRACE_INFO("Processing uplink request with length: %d\n", len);
+    // Parse MTU for next uplink (2 bytes, big-endian)
+    p_response->cmd_response_data.next_uplink_mtu = (data[0] << 8) | data[1];
 
-    // @todo : Noman - Process the uplink request here
 
-    // Assuming processing is successful
     return_status = API_PROCESSOR_SUCCESS;
 
     return return_status;
@@ -2530,6 +2536,53 @@ static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hd
     return return_status;
 }
 
+
+static api_processor_status_t api_processor_parse_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    do {
+        if (len < 3) { // 1 byte protocol + 2 bytes MTU
+            TRACE_INFO("Invalid payload length for GET_NEXT_UPLINK_MTU\n");
+            break;
+        }
+        p_response->cmd_response_data.next_uplink_mtu_protocol = data[0];
+        p_response->cmd_response_data.next_uplink_mtu = (data[1] << 8) | data[2];
+        return_status = API_PROCESSOR_SUCCESS;
+    } while (0);
+    return return_status;
+}
+
+api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    const uint16_t max_payload_size = 6;
+    do {
+        if (NULL == mcm_module || NULL == mcm_module->h_serial_device.send_data_cb) {
+            TRACE_INFO("MCM module is not initialized\n");
+            break;
+        }
+        memset(mcm_module->u8_send_payload, 0, MAX_SERIAL_SEND_PAYLOAD_SIZE);
+        mcm_module->u8_send_payload[0] = COMMAND_TYPE_GENERAL;
+        mcm_module->u8_send_payload[1] = MROVER_CC_GET_NEXT_UPLINK_MTU >> 8;
+        mcm_module->u8_send_payload[2] = MROVER_CC_GET_NEXT_UPLINK_MTU & 0xFF;
+        mcm_module->u8_send_payload[3] = 0x00;
+        mcm_module->u8_send_payload[4] = 0x00;
+        mcm_module->u8_send_payload[5] = 0x00;
+        fp_api_status_t status = fp_append_crc(mcm_module->u8_send_payload, max_payload_size);
+        if (FP_SUCCESS != status) {
+            TRACE_INFO("Failed to append crc\n");
+            break;
+        }
+        uint16_t u16_sent_bytes = mcm_module->h_serial_device.send_data_cb(mcm_module->u8_send_payload, max_payload_size, mcm_module->user_context);
+        if (max_payload_size != u16_sent_bytes) {
+            TRACE_INFO("Failed to send data through serial port\n");
+            return_status = API_PROCESSOR_SERIAL_PORT_ERROR;
+            break;
+        }
+        return_status = API_PROCESSOR_SUCCESS;
+    } while (0);
+    return return_status;
+}
 
 
 

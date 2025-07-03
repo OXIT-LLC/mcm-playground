@@ -68,7 +68,7 @@ extern "C" {
 #define BUFFER_SIZE (1036)
 
 #define MCM_ROVER_LIB_VER_MAJOR 0
-#define MCM_ROVER_LIB_VER_MINOR 4
+#define MCM_ROVER_LIB_VER_MINOR 5
 #define MCM_ROVER_LIB_VER_PATCH 0
 
 /**********************************************************************************************************
@@ -151,6 +151,7 @@ class MCM {
     bool _context_mgr_is_mcm_reset;
     void process_received_data();
 public:
+    uint16_t nextUplink_mtu;
     uint32_t gps_timestamp;
     bool is_lorawan_mac_time_synced;
     ver_type_1_t host_version;
@@ -214,6 +215,7 @@ public:
     uint8_t get_join_failure_data();
     void set_join_failure_data(uint8_t failure_reason, bool available);
     void get_join_failure_info(uint8_t *failure_reason);
+    MCM_STATUS get_next_uplink_mtu(uint16_t *mtu);
 };
 
 /**********************************************************************************************************

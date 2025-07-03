@@ -201,6 +201,8 @@ typedef enum{
     MROVER_CC_STOP_SID_LORAWAN_NETWORK             = 0x00FE,   // stop lorawan network
     MROVER_CC_INIT_LORAWAN                         = 0x00FF,   // initialize lorawan
     MROVER_CC_SWITCH_NETWORK                       = 0x0100,   // switch network between sidewalk and lorawan
+    MROVER_CC_GET_NEXT_UPLINK_MTU                  = 0x0101,  // get the next maximum allowed uplink payload
+
 }mrover_cc_codes_t;
 
 /**

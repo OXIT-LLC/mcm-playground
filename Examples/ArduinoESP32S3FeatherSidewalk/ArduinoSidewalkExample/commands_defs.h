@@ -198,6 +198,8 @@ typedef enum{
     MROVER_CC_START_FILE_TRANSFER                  = 0x00D3,   // start file transfer
     MROVER_CC_FILE_STATUS                          = 0x00D4,   // get file status
     MROVER_CC_TRIGGER_FW_UPDATE                    = 0x00D5,   // trigger firmware update
+    MROVER_CC_GET_NEXT_UPLINK_MTU                  = 0x0101,  // get the next maximum allowed uplink payload
+
 }mrover_cc_codes_t;
 
 /**

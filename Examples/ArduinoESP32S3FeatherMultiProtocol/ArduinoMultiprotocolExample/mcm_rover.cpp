@@ -715,8 +715,10 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
      */
     case MROVER_CC_REQUEST_UPLINK:
         Serial.printf("MROVER_CC_REQUEST_UPLINK\n");
+        curr_instance->nextUplink_mtu = mcm_helper_get_next_uplink_mtu(mcm_response);
         if (curr_instance->get_is_debug_enabled())
             Serial.printf("Uplink has been requested successfully\n");
+            Serial.printf("Next uplink MTU: %d\n", curr_instance->nextUplink_mtu);
         break;
 
     /**
@@ -965,7 +967,12 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
         }
     }
     break;
-
+    case MROVER_CC_GET_NEXT_UPLINK_MTU:
+    {
+        Serial.printf("MROVER_CC_GET_NEXT_UPLINK_MTU\n");
+        curr_instance->nextUplink_mtu = mcm_helper_get_next_uplink_mtu(mcm_response);
+    }
+    break;
     
     default:
         break;
@@ -1809,4 +1816,28 @@ MCM_STATUS MCM::process_fw_update()
 void MCM::get_join_failure_info(uint8_t *failure_reason)
 {
     *failure_reason = this->get_join_failure_data();
+}
+
+MCM_STATUS MCM::get_next_uplink_mtu(uint16_t *mtu)
+{
+    Serial.printf("Starting next uplink MTU retrieval process\n");
+    MCM_STATUS status                 = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    this->nextUplink_mtu = 0;        // Reset MTU
+    do
+    {
+        _ASSERT_PRINT(mtu != NULL, "Null pointer provided for next uplink MTU");
+
+        api_status = api_processor_cmd_get_next_uplink_mtu(this->module);
+        _ERROR_BREAK(api_status, "Failed to send last downlink stats command");
+
+        this->process_received_data();
+        *mtu             = this->nextUplink_mtu;
+        status           = MCM_STATUS::MCM_OK;
+
+        Serial.printf("Successfully retrieved next uplink MTU: %d\n", *mtu);
+
+    } while (0);
+
+    return status;
 }

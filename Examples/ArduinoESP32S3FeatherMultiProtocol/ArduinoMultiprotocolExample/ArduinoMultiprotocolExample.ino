@@ -10,7 +10,7 @@
  * @version 0.1
  * @date 2024-07-08
  * 
- * Copyright (c) 2024 Oxit.
+ * Copyright  (c) 2024 Oxit.
  * All rights reserved.
  * 
  * THE OPEN SOURCE SOFTWARE LICENSE AGREEMENT ("AGREEMENT") IS A BINDING LEGAL CONTRACT BETWEEN YOU ("YOU") AND OXIT, A COMPANY INCORPORATED UNDER THE LAWS OF THE UNITED STATES OF AMERICA ACTING FOR THE PURPOSE OF THIS AGREEMENT THROUGH ITS REGISTERED OFFICE AT OXIT, LLC, 3131 WESTINGHOUSE BLVD, CHARLOTTE, NC 28273.
@@ -257,8 +257,20 @@ static bool send_uplink(float temperature, float humidity)
         Serial.println("Device not connected to network.\n");
             break;
     }
+    
+    uint16_t uplink_mtu = 0;
+    if(app_getCachedNextUplink_mtu(&uplink_mtu) != 0){
+        Serial.println("Failed to get uplink mtu");
+        break;
+    }
 
-        set_led_state(LED_SENDING_UPLINK);
+    if (uplink_mtu == 0)
+    {
+        Serial.println("Invalid next uplink mtu");
+        break;
+    }
+
+    set_led_state(LED_SENDING_UPLINK);
     // Code to send uplink with temperature and humidity data
     Serial.printf("Sending uplink: Temp = %.2f, Humidity = %.2f, Reboot counter = %d\r\n", temperature, humidity, uplink_data.reboot_count);
 
@@ -1087,3 +1099,46 @@ int app_get_dl_stats(get_last_dl_stats_t *p_last_dl_stats)
 
     return ret;
 }
+
+int app_queryNextUplink_mtu(uint16_t *mtu)
+{
+    MCM_STATUS status = mcm.get_next_uplink_mtu(mtu);
+    return status != MCM_STATUS::MCM_OK ? -1 : 0;
+}
+
+int app_getCachedNextUplink_mtu(uint16_t *mtu) {
+    
+    if(device_mode == ConnectionMode::CONNECTION_MODE_NC){
+        return -1; //early return
+    }
+
+    int ret = 0;
+    
+    static uint16_t preNextUplink_mtu = 0;
+    static ConnectionMode preActiveProtocol = ConnectionMode::CONNECTION_MODE_NC;
+    if(preActiveProtocol != device_mode || preNextUplink_mtu == 0){
+        preActiveProtocol = device_mode;
+        do{
+            if(mtu == NULL) {
+                Serial.println("Error: Null pointer passed to get_next_uplink_mtu");
+                ret = -1;
+                break;
+            }
+            memset(mtu, 0, sizeof(uint16_t));
+
+            int status = app_queryNextUplink_mtu(mtu);
+            if (status != 0) {
+                Serial.println("Error: Failed to get next uplink MTU");
+                ret = -1;
+                break;
+            }
+
+        }while (0);
+        preNextUplink_mtu = *mtu;
+
+    }else{
+        *mtu = preNextUplink_mtu;
+    }
+    return ret; // or error code
+}
+
