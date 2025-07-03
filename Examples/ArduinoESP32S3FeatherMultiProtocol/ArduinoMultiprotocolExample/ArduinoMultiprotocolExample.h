@@ -95,7 +95,7 @@
 // Manufacturing mode and version information
 #define ENABLE_MANUFACTURING_MODE 0
 #define HOST_APP_VERSION_MAJOR 0x00
-#define HOST_APP_VERSION_MINOR 0x07
+#define HOST_APP_VERSION_MINOR 0x08
 #define HOST_APP_VERSION_PATCH 0x00
 
 /******************************************************************************
@@ -180,6 +180,6 @@ int app_queryNextUplink_mtu(uint16_t *mtu);
  * @param[out] mtu Pointer to store the retrieved MTU size
  * @return int 0 on success, non-zero on failure
  */
-int app_getCachedMaxUplink_mtu(uint16_t *mtu);
+int app_getCachedNextUplink_mtu(uint16_t *mtu);
 
 #endif // LRWAN_SIDEWALK_EX_H

@@ -259,7 +259,7 @@ static bool send_uplink(float temperature, float humidity)
         }
 
         uint16_t uplink_mtu = 0;
-        if(app_getCachedMaxUplink_mtu(&uplink_mtu) != 0){
+        if(app_getCachedNextUplink_mtu(&uplink_mtu) != 0){
             Serial.println("Failed to get uplink mtu");
             break;
         }
@@ -948,7 +948,7 @@ int app_queryNextUplink_mtu(uint16_t *mtu)
     return status != MCM_STATUS::MCM_OK ? -1 : 0;
 }
 
-int app_getCachedMaxUplink_mtu(uint16_t *mtu) {
+int app_getCachedNextUplink_mtu(uint16_t *mtu) {
     
     if(device_mode == ConnectionMode::CONNECTION_MODE_NC){
         return -1; //early return
