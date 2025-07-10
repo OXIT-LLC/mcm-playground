@@ -68,7 +68,7 @@ extern "C" {
 #define BUFFER_SIZE (1036)
 
 #define MCM_ROVER_LIB_VER_MAJOR 0
-#define MCM_ROVER_LIB_VER_MINOR 5
+#define MCM_ROVER_LIB_VER_MINOR 6
 #define MCM_ROVER_LIB_VER_PATCH 0
 
 /**********************************************************************************************************

@@ -1,5 +1,5 @@
 {
-  "release_date": "2025-07-03",
+  "release_date": "2025-07-10",
   "versions": {
     "mcm": {
       "application": "0.5.8",
@@ -16,9 +16,9 @@
       }
     },
     "host": {
-      "application": "0.7.0",
-      "lib_mcm_rover": "0.4.0",
-      "lib_api_processor": "0.3.0"
+      "application": "0.8.0",
+      "lib_mcm_rover": "0.5.0",
+      "lib_api_processor": "0.4.0"
     }
   }
 }
