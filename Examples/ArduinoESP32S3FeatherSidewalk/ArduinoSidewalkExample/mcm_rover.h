@@ -211,6 +211,7 @@ public:
     void set_join_failure_data(uint8_t failure_reason, bool available);
     void get_join_failure_info(uint8_t *failure_reason);
     MCM_STATUS get_next_uplink_mtu(uint16_t *mtu);
+    MCM_STATUS sw_setCssPwrProfile(uint8_t prof);
 };
 
 /**********************************************************************************************************

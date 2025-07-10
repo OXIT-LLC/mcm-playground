@@ -138,4 +138,12 @@ int app_queryNextUplink_mtu(uint16_t *mtu);
  */
 int app_getCachedNextUplink_mtu(uint16_t *mtu);
 
+/**
+ * @brief Set the CSS power profile for the Sidewalk CSS connection
+ * 
+ * @param profile Profile to be set A or B
+ * @return int 0 on success, non-zero on failure 
+ */
+int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) ;
+
 #endif // ARDUINO_SIDEWALK_EXAMPLE_H
