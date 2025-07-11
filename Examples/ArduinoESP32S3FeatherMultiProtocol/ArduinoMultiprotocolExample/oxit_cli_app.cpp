@@ -205,7 +205,7 @@ static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_by
  * @param pfun_uart_tx Function to send bytes over UART.
  * @return int Return status code.
  */
-static int sw_setCssPwrProfile_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
+static int sw_set_css_pwr_profile_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 
 /******************************************************************************/
 /* Global Variable Definition */
@@ -312,10 +312,10 @@ cli_command_t cli_commands[] = {{
                                                 get_next_uplink_mtu_callback,
                                             },
                                             {
-                                                "sidewalk_ccs_prof_switch",
-                                                CLI_APP_NAME" sidewalk_ccs_prof_switch <profile>",
-                                                "To set the sidewalk ccs profile",
-                                                sw_setCssPwrProfile_callback,
+                                                "sidewalk_css_prof_switch",
+                                                CLI_APP_NAME" sidewalk_css_prof_switch <profile>",
+                                                "To set the sidewalk css profile",
+                                                sw_set_css_pwr_profile_callback,
                                             },
                                             };
 
@@ -725,18 +725,18 @@ static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_by
     return 0;
 }
 
-static int sw_setCssPwrProfile_callback(const char *pu8_input_value,
+static int sw_set_css_pwr_profile_callback(const char *pu8_input_value,
                                         cli_send_bytes_t pfun_uart_tx) {
   // Check if user supplied a mode string
   uint8_t len = strlen(pu8_input_value);
-  if (pu8_input_value == NULL || len == 0 || len > 8) {
-    Serial.println("Usage: sidewalk_ccs_prof_switch <profile>");
+  if (pu8_input_value == NULL || len == 0 || len > 7) {
+    Serial.println("Usage: sidewalk_css_prof_switch <profile>");
     Serial.println("Available modes: prof_a and prof_b");
     return 1;
   }
 
   // Copy and convert the parameter to lower-case for simple comparison
-  char mode_param[8] = {0};
+  char mode_param[7] = {0};
   strncpy(mode_param, pu8_input_value, len);
   for (int i = 0; i < len; i++) {
     mode_param[i] = tolower(mode_param[i]);

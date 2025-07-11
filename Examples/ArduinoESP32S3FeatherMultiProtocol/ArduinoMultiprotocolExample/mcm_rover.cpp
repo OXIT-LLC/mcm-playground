@@ -1842,21 +1842,20 @@ MCM_STATUS MCM::get_next_uplink_mtu(uint16_t *mtu)
     return status;
 }
 
-MCM_STATUS MCM::sw_setCssPwrProfile(uint8_t prof) {
-  Serial.printf("Setting sidwalk ccs power profile\n");
+MCM_STATUS MCM::app_SWSetCSSPwrProfile(mrover_css_pwr_profile_t prof) {
+  Serial.printf("Setting sidwalk css power profile\n");
   MCM_STATUS status = MCM_STATUS::MCM_ERROR;
   api_processor_status_t api_status = API_PROCESSOR_ERROR;
   do {
-    api_status = api_processor_cmd_sid_set_css_profile(
-        this->module, (mrover_css_pwr_profile_t)prof);
+    api_status = api_processor_cmd_sid_set_css_profile(this->module, prof);
     _ERROR_BREAK(api_status,
-                 "Failed to send sidewalk set ccs power profile command");
+                 "Failed to send sidewalk set css power profile command");
 
     this->process_received_data();
 
     status = MCM_STATUS::MCM_OK;
     Serial.printf(
-        "Successfully requested change of sidewalk ccs power profile\n");
+        "Successfully requested change of sidewalk css power profile\n");
   } while (0);
 
   return status;
