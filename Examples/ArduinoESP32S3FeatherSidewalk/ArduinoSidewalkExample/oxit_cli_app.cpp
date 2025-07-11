@@ -168,7 +168,16 @@ void helper_print_hex_array(const uint8_t* arr, size_t len);
  * @param pfun_uart_tx  Function to send bytes over UART.
  * @return int Return status code.
  */
+
 static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
+/**
+ * @brief Set the CSS power profile callback
+ * 
+ * @param pu8_input_value input value (profile value)
+ * @param pfun_uart_tx Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int sw_set_css_pwr_profile_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 
 /******************************************************************************/
 /* Global Variable Definition */
@@ -255,6 +264,12 @@ cli_command_t cli_commands[] = {{
                                                 CLI_APP_NAME" get_next_uplink_mtu <enter>",
                                                 "To get next uplink MTU size",
                                                 get_next_uplink_mtu_callback,
+                                            },
+                                            {
+                                                "sidewalk_css_prof_switch",
+                                                CLI_APP_NAME" sidewalk_css_prof_switch <profile>",
+                                                "To set the sidewalk css profile",
+                                                sw_set_css_pwr_profile_callback,
                                             },
                                             };
 
@@ -591,4 +606,38 @@ static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_by
     Serial.print("Next Uplink MTU: ");
     Serial.println(mtu);
     return 0;
+}
+
+static int sw_set_css_pwr_profile_callback(const char *pu8_input_value,
+                                        cli_send_bytes_t pfun_uart_tx) {
+  // Check if user supplied a mode string
+  uint8_t len = strlen(pu8_input_value);
+  if (pu8_input_value == NULL || len == 0 || len > 7) {
+    Serial.println("Usage: sidewalk_css_prof_switch <profile>");
+    Serial.println("Available modes: prof_a and prof_b");
+    return 1;
+  }
+
+  // Copy and convert the parameter to lower-case for simple comparison
+  char mode_param[7] = {0};
+  strncpy(mode_param, pu8_input_value, len);
+  for (int i = 0; i < len; i++) {
+    mode_param[i] = tolower(mode_param[i]);
+  }
+
+  // Parse the parameter and prepare the corresponding ConnectionMode value
+  mrover_css_pwr_profile_t prof = (mrover_css_pwr_profile_t)0xFF;
+  if (strcmp(mode_param, "prof_a") == 0) {
+    prof = MROVER_CSS_PWR_PROFILE_A;
+  } else if (strcmp(mode_param, "prof_b") == 0) {
+    prof = MROVER_CSS_PWR_PROFILE_B;
+  } else {
+    Serial.println("Invalid protocol profile specified.");
+    Serial.println("Available modes: prof_a, prof_b");
+    return 1;
+  }
+  // Call the new protocol switch API to update the mode
+  app_SwSetCssPwrProfile(prof);
+
+  return 0;
 }

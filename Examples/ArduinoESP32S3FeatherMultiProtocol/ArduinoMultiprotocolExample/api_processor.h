@@ -65,7 +65,7 @@ extern "C" {
  *       the patch version number is incremented for bug fixes.
  */
 #define API_PROCESSOR_LIB_MAJOR_VERSION 0
-#define API_PROCESSOR_LIB_MINOR_VERSION 4
+#define API_PROCESSOR_LIB_MINOR_VERSION 5
 #define API_PROCESSOR_LIB_PATCH_VERSION 0
 
 /**********************************************************************************************************

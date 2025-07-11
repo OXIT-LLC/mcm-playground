@@ -68,7 +68,7 @@ extern "C" {
 #define BUFFER_SIZE (1036)
 
 #define MCM_ROVER_LIB_VER_MAJOR 0
-#define MCM_ROVER_LIB_VER_MINOR 4
+#define MCM_ROVER_LIB_VER_MINOR 5
 #define MCM_ROVER_LIB_VER_PATCH 0
 
 /**********************************************************************************************************
@@ -211,6 +211,7 @@ public:
     void set_join_failure_data(uint8_t failure_reason, bool available);
     void get_join_failure_info(uint8_t *failure_reason);
     MCM_STATUS get_next_uplink_mtu(uint16_t *mtu);
+    MCM_STATUS app_SWSetCSSPwrProfile(mrover_css_pwr_profile_t prof);
 };
 
 /**********************************************************************************************************

@@ -87,7 +87,7 @@
 // Manufacturing mode and version information
 #define ENABLE_MANUFACTURING_MODE 0
 #define HOST_APP_VERSION_MAJOR 0x00
-#define HOST_APP_VERSION_MINOR 0x07
+#define HOST_APP_VERSION_MINOR 0x08
 #define HOST_APP_VERSION_PATCH 0x00
 
 /******************************************************************************
@@ -137,5 +137,13 @@ int app_queryNextUplink_mtu(uint16_t *mtu);
  * @return int 0 on success, non-zero on failure
  */
 int app_getCachedNextUplink_mtu(uint16_t *mtu);
+
+/**
+ * @brief Set the CSS power profile for the Sidewalk CSS connection
+ * 
+ * @param profile Profile to be set A or B
+ * @return int 0 on success, non-zero on failure 
+ */
+int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) ;
 
 #endif // ARDUINO_SIDEWALK_EXAMPLE_H

@@ -962,6 +962,7 @@ static void check_device_connection()
                     break;
                 case ConnectionMode::CONNECTION_MODE_SIDEWALK_CSS:
                     set_led_state(LED_JOINED_SW_CSS_NETWORK);
+                    app_SwSetCssPwrProfile(MROVER_CSS_PWR_PROFILE_A);
                     break;
                 default:
                     Serial.println("No Connection (NC)");
@@ -1142,3 +1143,30 @@ int app_getCachedNextUplink_mtu(uint16_t *mtu) {
     return ret; // or error code
 }
 
+int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) {
+  if (profile > MROVER_CSS_PWR_PROFILE_B) {
+    return -1;
+  }
+
+  if (is_device_joined == false ||
+      device_mode != ConnectionMode::CONNECTION_MODE_SIDEWALK_CSS) {
+    Serial.println("Current running mode is not sidewalk CSS");
+    return -1; // early return
+  }
+
+  static mrover_css_pwr_profile_t SW_currentPwrProfile =
+      (mrover_css_pwr_profile_t)0xFF;
+  if (SW_currentPwrProfile == profile) {
+    Serial.printf("Sidewalk CSS Power Profile already set to: %d\n", profile);
+    return 0; // No change needed
+  }
+
+  // Set the power profile for the Sidewalk CSS connection
+  mcm.app_SWSetCSSPwrProfile(profile);
+  SW_currentPwrProfile = profile;
+  // Print the selected power profile
+  char prof_ch[MROVER_CSS_PWR_PROFILE_B + 1] = {'A', 'B'};
+  Serial.printf("Sidewalk CSS Power Profile set to: %c\n", prof_ch[profile]);
+
+  return 0;
+}
