@@ -1170,3 +1170,9 @@ int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) {
 
   return 0;
 }
+
+int app_triggerSelfTest(void){
+
+    MCM_STATUS status = mcm.trigger_self_test();
+    return status != MCM_STATUS::MCM_OK ? -1 : 0;
+}

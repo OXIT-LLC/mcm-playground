@@ -207,6 +207,14 @@ static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_by
  */
 static int sw_set_css_pwr_profile_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 
+/**
+ * @brief Triggers a self-test on the MCM device.
+ *
+ * @param pu8_input_value The input value (unused for this command).
+ * @param pfun_uart_tx Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int selftestTriggerCallback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 /******************************************************************************/
 /* Global Variable Definition */
 /******************************************************************************/
@@ -316,6 +324,12 @@ cli_command_t cli_commands[] = {{
                                                 CLI_APP_NAME" sidewalk_css_prof_switch <profile>",
                                                 "To set the sidewalk css profile",
                                                 sw_set_css_pwr_profile_callback,
+                                            },
+                                            {
+                                                "self_test",
+                                                CLI_APP_NAME" self_test <enter>",
+                                                "To trigger self test on the MCM",
+                                                selftestTriggerCallback,
                                             },
                                             };
 
@@ -757,4 +771,14 @@ static int sw_set_css_pwr_profile_callback(const char *pu8_input_value,
   app_SwSetCssPwrProfile(prof);
 
   return 0;
+}
+
+static int selftestTriggerCallback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx) {
+    // Call the self-test function
+    int status = app_triggerSelfTest();
+    if (status != 0) {
+        Serial.println("Error: Failed to trigger self-test");
+        return 1;
+    }
+    return 0;
 }

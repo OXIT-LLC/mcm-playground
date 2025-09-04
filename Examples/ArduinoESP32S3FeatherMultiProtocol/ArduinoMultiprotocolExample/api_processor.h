@@ -275,6 +275,7 @@ typedef union
     get_last_dl_stats_t last_dl_stats;
     uint16_t next_uplink_mtu;
     uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
+    uint8_t self_test_result; // self test result
 } cmd_response_data_t;
 
 /**
@@ -915,6 +916,12 @@ api_processor_status_t api_processor_cmd_get_last_dl_stats(mcm_module_hdl_t *mcm
  */
 api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module);
 
+/**
+ * @brief Triggers a self-test on the MCM module
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
+ */
+api_processor_status_t api_processor_cmd_selftestTrigger(mcm_module_hdl_t *mcm_module);
 /***********************************Helper Functions Prototypes *********************************/
 
 
@@ -1069,6 +1076,14 @@ mrover_lorawan_mac_event_t mcm_helper_get_mac_time_event(const api_processor_res
  * @return next uplink MTU
  */
 uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res);
+
+/**
+ * @brief Get the self-test result from the API processor response
+ * 
+ * @param res Pointer to the API processor response
+ * @return uint8_t The self-test result
+ */
+uint8_t mcm_helper_get_selftest_result(const api_processor_response_t *res);
 
 #ifdef __cplusplus
 }
