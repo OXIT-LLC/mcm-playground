@@ -105,7 +105,7 @@ static api_processor_status_t api_processor_parse_last_dl_stats(mcm_module_hdl_t
 static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hdl_t *mcm_module,uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_parse_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_parse_selftest_completed(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
-
+static api_processor_status_t api_processor_parse_selftest_result_query(mcm_module_hdl_t *mcm_module, const uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 
 /******************************************************************************
  * STATIC FUNCTIONS
@@ -237,6 +237,9 @@ static api_processor_status_t api_processor_parse_response_frame(mcm_module_hdl_
             break;
         case MROVER_CC_SELFTEST_TRIGGER:
             return_status = api_processor_parse_cmd_with_len_zero(mcm_module, &data[6], payload_len, p_response, "LoRaWAN Device Time Request");
+            break;
+        case MROVER_CC_SELFTEST_RESULT_QUERY:
+            return_status = api_processor_parse_selftest_result_query(mcm_module, &data[6], payload_len, p_response);
             break;
         default:
             TRACE_INFO("Wrong type of the command code received\n");
@@ -2972,4 +2975,46 @@ api_processor_status_t api_processor_cmd_selftestTrigger(mcm_module_hdl_t *mcm_m
     }while(0);
 
     return return_status;
+}
+
+
+api_processor_status_t api_processor_cmd_selftestResultQuery(mcm_module_hdl_t *mcm_module)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    const uint16_t max_payload_size = 6;
+    do {
+        if (NULL == mcm_module || NULL == mcm_module->h_serial_device.send_data_cb) {
+            TRACE_INFO("MCM module is not initialized\n");
+            break;
+        }
+        memset(mcm_module->u8_send_payload, 0, MAX_SERIAL_SEND_PAYLOAD_SIZE);
+        mcm_module->u8_send_payload[0] = COMMAND_TYPE_GENERAL;
+        mcm_module->u8_send_payload[1] = MROVER_CC_SELFTEST_RESULT_QUERY >> 8;
+        mcm_module->u8_send_payload[2] = MROVER_CC_SELFTEST_RESULT_QUERY & 0xFF;
+        fp_api_status_t status = fp_append_crc(mcm_module->u8_send_payload, max_payload_size);
+        if (FP_SUCCESS != status) {
+            TRACE_INFO("Failed to append crc\n");
+            break;
+        }
+        uint16_t u16_sent_bytes = mcm_module->h_serial_device.send_data_cb(mcm_module->u8_send_payload, max_payload_size, mcm_module->user_context);
+        if (max_payload_size != u16_sent_bytes) {
+            TRACE_INFO("Failed to send data through serial port\n");
+            return_status = API_PROCESSOR_SERIAL_PORT_ERROR;
+            break;
+        }
+        return_status = API_PROCESSOR_SUCCESS;
+    }while(0);
+
+    return return_status;
+}
+static api_processor_status_t api_processor_parse_selftest_result_query(mcm_module_hdl_t *mcm_module, const uint8_t *data, uint16_t len, api_processor_response_t *p_response)
+{
+    if (NULL == mcm_module || NULL == data || len != 1) {
+        TRACE_INFO("Invalid parameters\n");
+        return API_PROCESSOR_ERROR;
+    }
+
+    p_response->cmd_response_data.self_test_result =  data[0];
+    TRACE_INFO("Self-Test Result: 0x%02x\n",  data[0]);
+    return API_PROCESSOR_SUCCESS;
 }

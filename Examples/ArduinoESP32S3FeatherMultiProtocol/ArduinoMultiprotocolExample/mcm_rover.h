@@ -220,6 +220,7 @@ public:
     MCM_STATUS app_SWSetCSSPwrProfile(mrover_css_pwr_profile_t prof);
     MCM_STATUS trigger_self_test();
     uint8_t get_self_test_result();
+    MCM_STATUS query_self_test_result(uint8_t *result);
 };
 
 /**********************************************************************************************************

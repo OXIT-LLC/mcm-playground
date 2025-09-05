@@ -922,6 +922,14 @@ api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *m
  * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
  */
 api_processor_status_t api_processor_cmd_selftestTrigger(mcm_module_hdl_t *mcm_module);
+
+/**
+ * @brief   Sends a command to query the result of the self-test on the MCM module
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
+ */
+api_processor_status_t api_processor_cmd_selftestResultQuery(mcm_module_hdl_t *mcm_module);
+
 /***********************************Helper Functions Prototypes *********************************/
 
 

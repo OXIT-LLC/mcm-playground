@@ -1176,3 +1176,12 @@ int app_triggerSelfTest(void){
     MCM_STATUS status = mcm.trigger_self_test();
     return status != MCM_STATUS::MCM_OK ? -1 : 0;
 }
+
+int app_querySelfTestResult(uint8_t *result){
+
+    MCM_STATUS status = mcm.query_self_test_result(result);
+    if (status != MCM_STATUS::MCM_OK) {
+        return -1;
+    }
+    return 0;
+}
