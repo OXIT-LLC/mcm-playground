@@ -207,6 +207,23 @@ static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_by
  */
 static int sw_set_css_pwr_profile_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 
+/**
+ * @brief Triggers a self-test on the MCM device.
+ *
+ * @param pu8_input_value The input value (unused for this command).
+ * @param pfun_uart_tx Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int selftestTriggerCallback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
+
+/**
+ * @brief Queries the self-test result from the MCM device.
+ *
+ * @param pu8_input_value The input value (unused for this command).
+ * @param pfun_uart_tx Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int query_self_test_result_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 /******************************************************************************/
 /* Global Variable Definition */
 /******************************************************************************/
@@ -317,6 +334,18 @@ cli_command_t cli_commands[] = {{
                                                 "To set the sidewalk css profile",
                                                 sw_set_css_pwr_profile_callback,
                                             },
+                                            {
+                                                "self_test",
+                                                CLI_APP_NAME" self_test <enter>",
+                                                "To trigger self test on the MCM",
+                                                selftestTriggerCallback,
+                                            },
+                                            {
+                                                "query_self_test_result",
+                                                CLI_APP_NAME" query_self_test_result <enter>",
+                                                "To get the result of the self-test",
+                                                query_self_test_result_callback,
+                                            }
                                             };
 
 cli_app_t register_app = {  CLI_APP_NAME, 
@@ -757,4 +786,25 @@ static int sw_set_css_pwr_profile_callback(const char *pu8_input_value,
   app_SwSetCssPwrProfile(prof);
 
   return 0;
+}
+
+static int selftestTriggerCallback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx) {
+    // Call the self-test function
+    int status = app_triggerSelfTest();
+    if (status != 0) {
+        Serial.println("Error: Failed to trigger self-test");
+        return 1;
+    }
+    return 0;
+}
+
+static int query_self_test_result_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx) {
+    uint8_t result;
+    int status = app_querySelfTestResult(&result);
+    if (status != 0) {
+        Serial.println("Error: Failed to query self-test result");
+        return 1;
+    }
+    Serial.printf("Self-Test Result: 0x%02x\n", result);
+    return 0;
 }

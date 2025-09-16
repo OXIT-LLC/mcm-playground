@@ -510,7 +510,12 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
             }
         }
         break;
-
+        case MODEM_EVENT_SELFTEST_COMPLETED:
+        {
+            Serial.printf("MODEM_EVENT_SELFTEST_COMPLETED\n");    
+            // Store the self-test result in the MCM instance for later retrieval
+            curr_instance->self_test_result = mcm_helper_get_selftest_result(mcm_response);
+        }
         default:
             break;
         }
@@ -973,6 +978,11 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
         curr_instance->nextUplink_mtu = mcm_helper_get_next_uplink_mtu(mcm_response);
     }
     break;
+    case MROVER_CC_SELFTEST_RESULT_QUERY:
+    {
+        Serial.printf("MROVER_CC_SELFTEST_RESULT_QUERY\n");
+        curr_instance->self_test_result = mcm_helper_get_selftest_result(mcm_response);
+    }
     
     default:
         break;
@@ -1859,4 +1869,49 @@ MCM_STATUS MCM::app_SWSetCSSPwrProfile(mrover_css_pwr_profile_t prof) {
   } while (0);
 
   return status;
+}
+
+MCM_STATUS MCM::trigger_self_test(){
+    Serial.printf("Triggering self-test\n");
+    MCM_STATUS status = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    do {
+        api_status = api_processor_cmd_selftestTrigger(this->module);
+        _ERROR_BREAK(api_status, "Failed to send trigger self-test command");
+
+        this->process_received_data();
+
+        status = MCM_STATUS::MCM_OK;
+        Serial.printf("Successfully requested self-test\n");
+    } while (0);
+
+    return status;
+}
+
+uint8_t MCM::get_self_test_result()
+{
+    Serial.printf("Retrieving self-test result\n");
+    uint8_t result = this->self_test_result;
+    Serial.printf("Self-test result: %d\n", result);
+    return result;
+}
+
+MCM_STATUS MCM::query_self_test_result(uint8_t *result)
+{
+    Serial.printf("Querying self-test result\n");
+    MCM_STATUS status = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    do {
+        _ASSERT_PRINT(result != NULL, "Null pointer provided for self-test result");
+        api_status = api_processor_cmd_selftestResultQuery(this->module);
+        _ERROR_BREAK(api_status, "Failed to send self-test result query command");
+
+        this->process_received_data();
+
+        *result = this->self_test_result;
+        status = MCM_STATUS::MCM_OK;
+        Serial.printf("Successfully requested self-test result: 0x%02x\n", *result);
+    } while (0);
+
+    return status;
 }

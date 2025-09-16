@@ -190,4 +190,17 @@ int app_getCachedNextUplink_mtu(uint16_t *mtu);
  */
 int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) ;
 
+/**
+ * @brief Triggers a self-test function on the MCM
+ *
+ * @return int 0 on success, non-zero on failure
+ */
+int app_triggerSelfTest(void);
+
+/**
+ * @brief Retrieves the self-test result from the MCM
+ *
+ * @return int 0 on success, non-zero on failure
+ */
+int app_querySelfTestResult(uint8_t *result);
 #endif // LRWAN_SIDEWALK_EX_H

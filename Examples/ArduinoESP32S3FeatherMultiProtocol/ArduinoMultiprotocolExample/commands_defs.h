@@ -202,7 +202,8 @@ typedef enum{
     MROVER_CC_INIT_LORAWAN                         = 0x00FF,   // initialize lorawan
     MROVER_CC_SWITCH_NETWORK                       = 0x0100,   // switch network between sidewalk and lorawan
     MROVER_CC_GET_NEXT_UPLINK_MTU                  = 0x0101,  // get the next maximum allowed uplink payload
-
+    MROVER_CC_SELFTEST_RESULT_QUERY                = 0x0103,   // query self test result
+    MROVER_CC_SELFTEST_TRIGGER                     = 0x0104,   // trigger self test
 }mrover_cc_codes_t;
 
 /**
@@ -231,6 +232,7 @@ typedef enum{
     MODEM_EVENT_LORAWAN_MAC_TIME          = 0x15, //!< Device Time is ready or not
     MODEM_EVENT_SEGMENTED_FILE_DOWNLOAD   = 0xD0, //!< Event to notify Host about successful file (full) and segments transfer
     MODEM_EVENT_CLASS_SWITCHED            = 0xF0, //!< LORAWAN Class has been switched
+    MODEM_EVENT_SELFTEST_COMPLETED        = 0xE0, //!< Self test has been completed
     MODEM_EVENT_NONE                      = 0xFF  //!< No event available
  }get_event_code_t;
 

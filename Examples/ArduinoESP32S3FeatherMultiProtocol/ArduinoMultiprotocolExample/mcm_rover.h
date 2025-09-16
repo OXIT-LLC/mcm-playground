@@ -151,6 +151,7 @@ class MCM {
     bool _context_mgr_is_mcm_reset;
     void process_received_data();
 public:
+    uint8_t self_test_result;
     uint16_t nextUplink_mtu;
     uint32_t gps_timestamp;
     bool is_lorawan_mac_time_synced;
@@ -217,6 +218,9 @@ public:
     void get_join_failure_info(uint8_t *failure_reason);
     MCM_STATUS get_next_uplink_mtu(uint16_t *mtu);
     MCM_STATUS app_SWSetCSSPwrProfile(mrover_css_pwr_profile_t prof);
+    MCM_STATUS trigger_self_test();
+    uint8_t get_self_test_result();
+    MCM_STATUS query_self_test_result(uint8_t *result);
 };
 
 /**********************************************************************************************************
