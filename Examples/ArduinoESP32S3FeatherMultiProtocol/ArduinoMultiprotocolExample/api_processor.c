@@ -567,7 +567,6 @@ static api_processor_status_t api_processor_parse_selftest_completed(mcm_module_
         }
 
     } while (0);
-
     return return_status;
 }
 static api_processor_status_t api_processor_parse_get_event_seg(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response)
