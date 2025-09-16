@@ -514,7 +514,7 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
         {
             Serial.printf("MODEM_EVENT_SELFTEST_COMPLETED\n");    
             // Store the self-test result in the MCM instance for later retrieval
-            curr_instance->self_test_result = mcm_helper_get_selftest_result(mcm_response);;
+            curr_instance->self_test_result = mcm_helper_get_selftest_result(mcm_response);
         }
         default:
             break;
