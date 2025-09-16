@@ -1891,7 +1891,7 @@ MCM_STATUS MCM::trigger_self_test(){
 uint8_t MCM::get_self_test_result()
 {
     Serial.printf("Retrieving self-test result\n");
-    uint8_t result = this->self_test_result;//mcm_helper_get_selftest_result(this->module->response);
+    uint8_t result = this->self_test_result;
     Serial.printf("Self-test result: %d\n", result);
     return result;
 }
