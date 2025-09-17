@@ -298,6 +298,7 @@ static bool send_uplink(float temperature, float humidity)
     return uplink_done;
 }
 
+
 static void handle_downlink()
 {
     // lets check if any download is available
@@ -1169,4 +1170,41 @@ int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) {
   Serial.printf("Sidewalk CSS Power Profile set to: %c\n", prof_ch[profile]);
 
   return 0;
+}
+
+/**
+ * @brief Sends the TX power command to NCP for current protocol.
+ *
+ * @param tx_power The TX power value to set (9-22).
+ * @return int 0 on success, non-zero on failure.
+ */
+int app_set_tx_power(int8_t tx_power)
+{
+    // Validate range
+    if (tx_power < 9 || tx_power > 22) {
+        Serial.println("Error: TX configured power is out of range (9-22)");
+        return -1;
+    }
+
+    if (mcm.set_tx_power(tx_power) != MCM_STATUS::MCM_OK) {
+        Serial.println("Error: Failed to send set_tx_power command to NCP");
+        return -1;
+    }
+   
+    return 0;
+}
+
+/**
+ * @brief Gets the TX power from the NCP.
+ *
+ * @param tx_power Pointer to store the TX power value.
+ * @return int 0 on success, non-zero on failure.
+ */
+int app_get_tx_power(int8_t *tx_power)
+{
+    if (mcm.get_tx_power(tx_power) != MCM_STATUS::MCM_OK) {
+        Serial.println("Error: Failed to send get_tx_power command to NCP");
+        return -1;
+    }
+    return 0;
 }

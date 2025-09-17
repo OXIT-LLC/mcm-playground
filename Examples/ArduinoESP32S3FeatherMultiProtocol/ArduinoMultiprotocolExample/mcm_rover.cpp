@@ -973,6 +973,21 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
         curr_instance->nextUplink_mtu = mcm_helper_get_next_uplink_mtu(mcm_response);
     }
     break;
+    case MROVER_CC_SET_TX_POWER:
+    {
+        Serial.printf("MROVER_CC_SET_TX_POWER\n");
+        if (curr_instance->get_is_debug_enabled())
+            Serial.printf("Command to set TX power has been successfully received by the mcm\n");
+    }
+    break;
+    case MROVER_CC_GET_TX_POWER:
+    {
+        Serial.printf("MROVER_CC_GET_TX_POWER\n");
+        curr_instance->_tx_power = mcm_helper_get_tx_power(mcm_response);
+        if (curr_instance->get_is_debug_enabled())
+            Serial.printf("TX power: %d\n", curr_instance->_tx_power);
+    }
+    break;
     
     default:
         break;
@@ -1859,4 +1874,52 @@ MCM_STATUS MCM::app_SWSetCSSPwrProfile(mrover_css_pwr_profile_t prof) {
   } while (0);
 
   return status;
+}
+
+void MCM::_set_cached_tx_power(int8_t val)
+{
+    this->_tx_power = val;
+}
+
+
+int8_t MCM::get_cached_tx_power()
+{
+    return this->_tx_power;
+}
+
+MCM_STATUS MCM::set_tx_power(int8_t tx_power)
+{
+    Serial.printf("Setting TX power to %d\n", tx_power);
+    MCM_STATUS status = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    do {
+        api_status = api_processor_cmd_set_tx_power(this->module, tx_power);
+        _ERROR_BREAK(api_status, "Failed to send set_tx_power command");
+
+        this->process_received_data();
+
+        status = MCM_STATUS::MCM_OK;
+        Serial.printf("Successfully requested to set TX power\n");
+    } while (0);
+
+    return status;
+}
+
+MCM_STATUS MCM::get_tx_power(int8_t *tx_power)
+{
+    Serial.printf("Getting TX power\n");
+    MCM_STATUS status = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    do {
+        api_status = api_processor_cmd_get_tx_power(this->module);
+        _ERROR_BREAK(api_status, "Failed to send get_tx_power command");
+
+        this->process_received_data();
+        *tx_power = this->_tx_power;
+
+        status = MCM_STATUS::MCM_OK;
+        // Serial.printf("Successfully requested to get TX power\n");
+    } while (0);
+
+    return status;
 }

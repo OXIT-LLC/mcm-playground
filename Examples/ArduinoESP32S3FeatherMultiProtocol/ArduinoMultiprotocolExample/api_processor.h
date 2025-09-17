@@ -275,6 +275,7 @@ typedef union
     get_last_dl_stats_t last_dl_stats;
     uint16_t next_uplink_mtu;
     uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
+    uint8_t tx_power;
 } cmd_response_data_t;
 
 /**
@@ -915,6 +916,15 @@ api_processor_status_t api_processor_cmd_get_last_dl_stats(mcm_module_hdl_t *mcm
  */
 api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module);
 
+api_processor_status_t api_processor_cmd_set_tx_power(mcm_module_hdl_t *mcm_module, int8_t tx_power);
+/**
+ * @brief Constructs and sends a command to get the current TX power
+ * 
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
+ */
+api_processor_status_t api_processor_cmd_get_tx_power(mcm_module_hdl_t *mcm_module);
+
 /***********************************Helper Functions Prototypes *********************************/
 
 
@@ -1069,6 +1079,14 @@ mrover_lorawan_mac_event_t mcm_helper_get_mac_time_event(const api_processor_res
  * @return next uplink MTU
  */
 uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res);
+
+/**
+ * @brief return the tx power
+ * 
+ * @param res Pointer to the API processor response
+ * @return tx power
+ */
+int8_t mcm_helper_get_tx_power(const api_processor_response_t *res);
 
 #ifdef __cplusplus
 }

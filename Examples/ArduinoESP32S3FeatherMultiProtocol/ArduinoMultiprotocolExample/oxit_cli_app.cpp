@@ -55,7 +55,6 @@
 #include <oxit_nvs.h>
 #include "ArduinoMultiprotocolExample.h"
 
-
 #define CLI_APP_NAME "oxit_cli"
 /******************************************************************************/
 /* Scope Limited variables */
@@ -207,6 +206,24 @@ static int get_next_uplink_mtu_callback(const char *pu8_input_value, cli_send_by
  */
 static int sw_set_css_pwr_profile_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
 
+/**
+ * @brief Set the tx power callback
+ * 
+ * @param pu8_input_value input value (tx power value)
+ * @param pfun_uart_tx Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int set_tx_power_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
+
+/**
+ * @brief Get the tx power callback
+ * 
+ * @param pu8_input_value The input value (unused).
+ * @param pfun_uart_tx Function to send bytes over UART.
+ * @return int Return status code.
+ */
+static int get_tx_power_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx);
+
 /******************************************************************************/
 /* Global Variable Definition */
 /******************************************************************************/
@@ -316,6 +333,18 @@ cli_command_t cli_commands[] = {{
                                                 CLI_APP_NAME" sidewalk_css_prof_switch <profile>",
                                                 "To set the sidewalk css profile",
                                                 sw_set_css_pwr_profile_callback,
+                                            },
+                                            {
+                                                "set_tx_power",
+                                                CLI_APP_NAME" set_tx_power <power_val>",
+                                                "To set the transmission power (9-22)",
+                                                set_tx_power_callback,
+                                            },
+                                            {
+                                                "get_tx_power",
+                                                CLI_APP_NAME" get_tx_power",
+                                                "To get the current transmission power",
+                                                get_tx_power_callback,
                                             },
                                             };
 
@@ -758,3 +787,36 @@ static int sw_set_css_pwr_profile_callback(const char *pu8_input_value,
 
   return 0;
 }
+
+static int set_tx_power_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx)
+{
+    if (pu8_input_value == NULL || strlen(pu8_input_value) == 0)
+    {
+        Serial.println("Usage: set_tx_power <power_val>");
+        Serial.println("power_val should be between 9 and 22.");
+        return 1;
+    }
+
+    int power = atoi(pu8_input_value);
+
+    if (app_set_tx_power(power) != 0) {
+        return 1; // Error message is printed inside app_set_tx_power
+    }
+
+    Serial.printf("TX power set to: %d\n", power);
+
+    return 0;
+}
+
+static int get_tx_power_callback(const char *pu8_input_value, cli_send_bytes_t pfun_uart_tx)
+{
+    int8_t power = 0;
+    if (app_get_tx_power(&power) != 0) {
+        return 1; // Error message is printed inside app_get_tx_power
+    }
+
+    Serial.printf("\n Received from MCM: Current TX power: %d\n", power);
+
+    return 0;
+}
+

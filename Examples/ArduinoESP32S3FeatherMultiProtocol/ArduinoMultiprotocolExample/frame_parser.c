@@ -192,9 +192,11 @@ static bool is_valid_command_code(uint16_t u16_command_code)
     case MROVER_CC_TRIGGER_FW_UPDATE:
     case MROVER_CC_GET_LAST_DL_STATS:
     case MROVER_CC_GET_NEXT_UPLINK_MTU:
+    case MROVER_CC_SET_TX_POWER:  
+    case MROVER_CC_GET_TX_POWER:  
         b_is_valid_command_code = true;
-        
         break;
+    
     
     default:
         break;
@@ -266,7 +268,7 @@ fp_api_status_t fp_is_valid_response_frame(uint8_t *data, uint16_t len)
 
         if (false == is_valid_command_type(data[1]))
         {
-            TRACE_INFO("Invalid command code %d\n", data[1]);
+            TRACE_INFO("Invalid command type %d\n", data[1]);
             return_status = FP_INVALID_COMMAND_TYPE;
             break;
         }

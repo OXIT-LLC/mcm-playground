@@ -104,7 +104,7 @@ static api_processor_status_t api_procesor_parse_lorawan_mac_time(mcm_module_hdl
 static api_processor_status_t api_processor_parse_last_dl_stats(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hdl_t *mcm_module,uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_parse_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
-
+static api_processor_status_t api_processor_parse_get_tx_power(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 
 
 /******************************************************************************
@@ -234,6 +234,11 @@ static api_processor_status_t api_processor_parse_response_frame(mcm_module_hdl_
         
         case MROVER_CC_GET_NEXT_UPLINK_MTU:     
             return_status = api_processor_parse_get_next_uplink_mtu(mcm_module, &data[6], payload_len, p_response);
+            break;
+        
+        case MROVER_CC_GET_TX_POWER:
+            return_status = api_processor_parse_get_tx_power(mcm_module, &data[6],
+                payload_len, p_response);
             break;
 
         default:
@@ -1068,6 +1073,10 @@ inline mrover_lorawan_class_t mcm_helper_get_device_class(const api_processor_re
 
 inline uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res) {
     return res->cmd_response_data.next_uplink_mtu;
+}
+
+inline int8_t mcm_helper_get_tx_power(const api_processor_response_t *res) {
+    return res->cmd_response_data.tx_power;
 }
 
 void mcm_helper_get_version(const api_processor_response_t *res,ver_type_2_t *bootloader,ver_type_2_t* mdm_fw,\
@@ -2889,6 +2898,20 @@ static api_processor_status_t api_processor_parse_get_next_uplink_mtu(mcm_module
     return return_status;
 }
 
+static api_processor_status_t api_processor_parse_get_tx_power(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    do {
+         if (len != 1) { // 1 byte protocol + 2 bytes MTU
+            TRACE_INFO("Invalid payload length for GET_TX_POWER\n");
+            break;
+        }
+        p_response->cmd_response_data.tx_power = (int8_t)data[0];
+        return_status = API_PROCESSOR_SUCCESS;
+    } while (0);
+    return return_status;
+}
+
 api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module)
 {
     api_processor_status_t return_status = API_PROCESSOR_ERROR;
@@ -2914,6 +2937,71 @@ api_processor_status_t api_processor_cmd_get_next_uplink_mtu(mcm_module_hdl_t *m
         if (max_payload_size != u16_sent_bytes) {
             TRACE_INFO("Failed to send data through serial port\n");
             return_status = API_PROCESSOR_SERIAL_PORT_ERROR;
+            break;
+        }
+        return_status = API_PROCESSOR_SUCCESS;
+    } while (0);
+    return return_status;
+}
+
+api_processor_status_t api_processor_cmd_set_tx_power(mcm_module_hdl_t *mcm_module, int8_t tx_power)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    const uint16_t max_payload_size = MIN_TX_PAYLOAD_LEN + 1;
+    do {
+        if (NULL == mcm_module || NULL == mcm_module->h_serial_device.send_data_cb)
+        {
+            break;
+        }
+        memset(mcm_module->u8_send_payload, 0, MAX_SERIAL_SEND_PAYLOAD_SIZE);
+        mcm_module->u8_send_payload[0] = COMMAND_TYPE_SIDEWALK;
+        mcm_module->u8_send_payload[1] = MROVER_CC_SET_TX_POWER >> 8;
+        mcm_module->u8_send_payload[2] = MROVER_CC_SET_TX_POWER & 0xFF;
+        mcm_module->u8_send_payload[3] = 0x00;
+        mcm_module->u8_send_payload[4] = 0x01;
+        mcm_module->u8_send_payload[5] = tx_power;
+
+        fp_api_status_t status = fp_append_crc(mcm_module->u8_send_payload, max_payload_size);
+        if (FP_SUCCESS != status)
+        {
+            break;
+        }
+
+        uint16_t u16_sent_bytes = mcm_module->h_serial_device.send_data_cb(mcm_module->u8_send_payload, max_payload_size,mcm_module->user_context);
+        if (max_payload_size != u16_sent_bytes)
+        {
+            break;
+        }
+        return_status = API_PROCESSOR_SUCCESS;
+    } while (0);
+    return return_status;
+}
+
+api_processor_status_t api_processor_cmd_get_tx_power(mcm_module_hdl_t *mcm_module)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    const uint16_t max_payload_size = MIN_TX_PAYLOAD_LEN;
+    do {
+        if (NULL == mcm_module || NULL == mcm_module->h_serial_device.send_data_cb)
+        {
+            break;
+        }
+        memset(mcm_module->u8_send_payload, 0, MAX_SERIAL_SEND_PAYLOAD_SIZE);
+        mcm_module->u8_send_payload[0] = COMMAND_TYPE_SIDEWALK;
+        mcm_module->u8_send_payload[1] = MROVER_CC_GET_TX_POWER >> 8;
+        mcm_module->u8_send_payload[2] = MROVER_CC_GET_TX_POWER & 0xFF;
+        mcm_module->u8_send_payload[3] = 0;
+        mcm_module->u8_send_payload[4] = 0;
+
+        fp_api_status_t status = fp_append_crc(mcm_module->u8_send_payload, max_payload_size);
+        if (FP_SUCCESS != status)
+        {
+            break;
+        }
+
+        uint16_t u16_sent_bytes = mcm_module->h_serial_device.send_data_cb(mcm_module->u8_send_payload, max_payload_size,mcm_module->user_context);
+        if (max_payload_size != u16_sent_bytes)
+        {
             break;
         }
         return_status = API_PROCESSOR_SUCCESS;

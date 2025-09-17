@@ -190,4 +190,7 @@ int app_getCachedNextUplink_mtu(uint16_t *mtu);
  */
 int app_SwSetCssPwrProfile(mrover_css_pwr_profile_t profile) ;
 
+int app_set_tx_power(int8_t tx_power);
+int app_get_tx_power(int8_t *tx_power);
+
 #endif // LRWAN_SIDEWALK_EX_H
