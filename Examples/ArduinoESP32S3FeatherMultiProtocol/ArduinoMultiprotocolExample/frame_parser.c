@@ -194,6 +194,7 @@ static bool is_valid_command_code(uint16_t u16_command_code)
     case MROVER_CC_GET_NEXT_UPLINK_MTU:
     case MROVER_CC_SELFTEST_TRIGGER:
     case MROVER_CC_SELFTEST_RESULT_QUERY:
+    case MROVER_CC_BLE_SCAN_TRIGGER:
         b_is_valid_command_code = true;
         
         break;

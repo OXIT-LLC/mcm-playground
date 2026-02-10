@@ -564,7 +564,7 @@ void setup()
 
     // reboot the module
     mcm.hw_reset();
-
+# if 0
     ver_type_1_t mcm_rover_lib_ver, c_lib_ver;
     mcm.retrieveLibraryVersions(&mcm_rover_lib_ver, &c_lib_ver);
     Serial.println("MCM Rover Library Version: " + String(mcm_rover_lib_ver.major) + "." + String(mcm_rover_lib_ver.minor) + "." + String(mcm_rover_lib_ver.patch));
@@ -611,7 +611,7 @@ void setup()
      get_seg_file_status_t file_status;
     // send get segment command
     mcm.get_segmented_file_download_status(&file_status);
-  
+  #endif
 #endif
 }
 
@@ -620,17 +620,23 @@ void loop()
 #if ENABLE_MANUFACTURING_MODE
     // do nothing
 #else
-    process_blink_requests(); // Add this line to process LED states
+    // process_blink_requests(); // Add this line to process LED states
     // Run the state machine to handle the current application state
     // This function checks the current state and performs the appropriate actions
     // based on the current state. This function is called repeatedly in the loop function.
-    run_state_machine();
-
+    // run_state_machine();
+    static bool is_ble_scan_initiated = false;
+    if(!is_ble_scan_initiated)
+    {
+        Serial.println("Initiating BLE scan...");
+        app_trigger_ble_scan();
+        is_ble_scan_initiated = true;
+    }
     // process the events received from MCM
     mcm.handle_rx_events();
 
     // handling the cli data from the command line
-    process_command_line_app();
+    // process_command_line_app();
 
     // Call the handleButtonPress function to handle button press and debounce
     handleButtonPress();
@@ -879,17 +885,18 @@ static void handleButtonPress()
         // Button state has changed, check for press or release
         if (reading == LOW)
         {
-            Serial.println("Switching Network");
-            // Toggle between LoRaWAN and Sidewalk CSS modes
-            if (currentMode == ConnectionMode::CONNECTION_MODE_LORAWAN)
-            {
-                currentMode = ConnectionMode::CONNECTION_MODE_SIDEWALK_CSS;
-            }
-            else
-            {
-                currentMode = ConnectionMode::CONNECTION_MODE_LORAWAN;
-            }
-            switch_protocol_mode(currentMode);
+            // Serial.println("Switching Network");
+            // // Toggle between LoRaWAN and Sidewalk CSS modes
+            // if (currentMode == ConnectionMode::CONNECTION_MODE_LORAWAN)
+            // {
+            //     currentMode = ConnectionMode::CONNECTION_MODE_SIDEWALK_CSS;
+            // }
+            // else
+            // {
+            //     currentMode = ConnectionMode::CONNECTION_MODE_LORAWAN;
+            // }
+            // switch_protocol_mode(currentMode);
+            app_trigger_ble_scan(); 
         }
 
         lastDebounceTime = millis(); // Update debounce timer
@@ -910,17 +917,18 @@ static void handleButtonPress()
         //     return;
         // }
 
-        Serial.println("Button pressed - Switching Network");
+        // Serial.println("Button pressed - Switching Network");
 
-        if (device_mode == ConnectionMode::CONNECTION_MODE_LORAWAN)
-        {
-            device_mode = ConnectionMode::CONNECTION_MODE_SIDEWALK_FSK;
-        }
-        else
-        {
-            device_mode = ConnectionMode::CONNECTION_MODE_LORAWAN;
-        }
-        switch_protocol_mode(device_mode);
+        // if (device_mode == ConnectionMode::CONNECTION_MODE_LORAWAN)
+        // {
+        //     device_mode = ConnectionMode::CONNECTION_MODE_SIDEWALK_FSK;
+        // }
+        // else
+        // {
+        //     device_mode = ConnectionMode::CONNECTION_MODE_LORAWAN;
+        // }
+        // switch_protocol_mode(device_mode);
+        app_trigger_ble_scan(); // Trigger BLE scan when switching to Sidewalk BLE mode
 }
 
 #endif
@@ -1184,4 +1192,9 @@ int app_querySelfTestResult(uint8_t *result){
         return -1;
     }
     return 0;
+}
+
+int app_trigger_ble_scan(void){
+    MCM_STATUS status = mcm.trigger_ble_scan();
+    return status != MCM_STATUS::MCM_OK ? -1 : 0;
 }

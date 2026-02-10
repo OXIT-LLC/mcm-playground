@@ -516,6 +516,13 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
             // Store the self-test result in the MCM instance for later retrieval
             curr_instance->self_test_result = mcm_helper_get_selftest_result(mcm_response);
         }
+        case MODEM_EVENT_BLE_SCAN_COMPLETED:
+        {
+            Serial.printf("MODEM_EVENT_BLE_SCAN_COMPLETED\n");
+            mcm_helper_get_ble_scan_data(mcm_response, curr_instance->ble_scan_data, &curr_instance->ble_scan_data_len);
+            curr_instance->is_ble_scan_data_available = true;
+            
+        }
         default:
             break;
         }
@@ -1914,4 +1921,36 @@ MCM_STATUS MCM::query_self_test_result(uint8_t *result)
     } while (0);
 
     return status;
+}
+
+MCM_STATUS MCM::trigger_ble_scan(){
+    Serial.printf("Triggering BLE scan\n");
+    MCM_STATUS status = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    do {
+        api_status = api_processor_cmd_ble_scan_trigger(this->module);
+        _ERROR_BREAK(api_status, "Failed to send trigger BLE scan command");
+
+        this->process_received_data();
+
+        status = MCM_STATUS::MCM_OK;
+        Serial.printf("Successfully requested BLE scan\n");
+    } while (0);
+
+    return status;
+}
+
+bool MCM::is_ble_scan_data_available()
+{
+    return this->is_ble_scan_data_available;
+}
+
+void MCM::get_ble_scan_data(uint8_t *data, uint16_t *len)
+{
+    Serial.printf("Retrieving BLE scan result\n");
+    _ASSERT_PRINT(data != NULL, "Null pointer provided for BLE scan result");
+    memcpy(data, &this->ble_scan_data, this->ble_scan_data_len);
+    this->is_ble_scan_data_available = false; // Reset flag after retrieving data
+    *len = this->ble_scan_data_len;
+    Serial.printf("BLE scan result retrieved: len=%d\n", *len);
 }

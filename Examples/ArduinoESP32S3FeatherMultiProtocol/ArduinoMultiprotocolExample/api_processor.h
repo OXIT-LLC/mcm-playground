@@ -276,6 +276,8 @@ typedef union
     uint16_t next_uplink_mtu;
     uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
     uint8_t self_test_result; // self test result
+    uint8_t *ble_scan_data; // pointer to the ble scan data
+    uint16_t ble_scan_data_len; // length of the ble scan data
 } cmd_response_data_t;
 
 /**
@@ -930,6 +932,14 @@ api_processor_status_t api_processor_cmd_selftestTrigger(mcm_module_hdl_t *mcm_m
  */
 api_processor_status_t api_processor_cmd_selftestResultQuery(mcm_module_hdl_t *mcm_module);
 
+/**
+ * @brief Triggers the BLE central scannning
+ * 
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code on failure
+ */
+api_processor_status_t api_processor_cmd_ble_scan_trigger(mcm_module_hdl_t *mcm_module);
+
 /***********************************Helper Functions Prototypes *********************************/
 
 
@@ -1092,6 +1102,15 @@ uint16_t mcm_helper_get_next_uplink_mtu(const api_processor_response_t *res);
  * @return uint8_t The self-test result
  */
 uint8_t mcm_helper_get_selftest_result(const api_processor_response_t *res);
+
+
+/**
+ * @brief Get the BLE scan data from the API processor response
+ * 
+ * @param res Pointer to the API processor response
+ * @param data Pointer to store the BLE scan data
+ */
+void mcm_helper_get_ble_scan_data(const api_processor_response_t *res, uint8_t *data, uint16_t *len);
 
 #ifdef __cplusplus
 }

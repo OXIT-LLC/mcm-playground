@@ -221,6 +221,12 @@ public:
     MCM_STATUS trigger_self_test();
     uint8_t get_self_test_result();
     MCM_STATUS query_self_test_result(uint8_t *result);
+    MCM_STATUS trigger_ble_scan();
+        uint8_t ble_scan_data[256];
+        uint16_t ble_scan_data_len;
+        bool is_ble_scan_data_available = false;
+        bool is_ble_scan_data_available();
+        void get_ble_scan_data(uint8_t *data, uint16_t *len);
 };
 
 /**********************************************************************************************************

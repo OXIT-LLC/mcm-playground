@@ -203,4 +203,10 @@ int app_triggerSelfTest(void);
  * @return int 0 on success, non-zero on failure
  */
 int app_querySelfTestResult(uint8_t *result);
+
+/**
+ * @brief Triggers a BLE scan on the MCM
+ * @return int 0 on success, non-zero on failure
+ */
+int app_trigger_ble_scan(void);
 #endif // LRWAN_SIDEWALK_EX_H

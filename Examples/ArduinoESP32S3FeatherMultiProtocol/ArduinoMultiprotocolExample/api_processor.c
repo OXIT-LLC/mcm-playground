@@ -106,6 +106,7 @@ static api_processor_status_t api_processor_get_event_join_failure(mcm_module_hd
 static api_processor_status_t api_processor_parse_get_next_uplink_mtu(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_parse_selftest_completed(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 static api_processor_status_t api_processor_parse_selftest_result_query(mcm_module_hdl_t *mcm_module, const uint8_t *data, uint16_t len, api_processor_response_t *p_response);
+static api_processor_status_t api_processor_parse_bleScan_completed(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response);
 
 /******************************************************************************
  * STATIC FUNCTIONS
@@ -240,6 +241,9 @@ static api_processor_status_t api_processor_parse_response_frame(mcm_module_hdl_
             break;
         case MROVER_CC_SELFTEST_RESULT_QUERY:
             return_status = api_processor_parse_selftest_result_query(mcm_module, &data[6], payload_len, p_response);
+            break;
+        case MROVER_CC_BLE_SCAN_TRIGGER:
+            return_status = api_processor_parse_cmd_with_len_zero(mcm_module, &data[6], payload_len, p_response, "BLE Scan Trigger");
             break;
         default:
             TRACE_INFO("Wrong type of the command code received\n");
@@ -401,6 +405,10 @@ static api_processor_status_t api_processor_parse_get_event(mcm_module_hdl_t *mc
             return_status = api_processor_parse_selftest_completed(mcm_module,&data[2],len, p_response);
             break;
 
+        case MODEM_EVENT_BLE_SCAN_COMPLETED:
+            TRACE_INFO("MODEM_EVENT_BLE_SCAN_COMPLETED\n");
+            return_status = api_processor_parse_bleScan_completed(mcm_module,&data[2],len, p_response);
+            break;
         case MODEM_EVENT_NONE:
             TRACE_INFO("MODEM_EVENT_NONE\n");
             return_status = API_PROCESSOR_SUCCESS;
@@ -569,6 +577,31 @@ static api_processor_status_t api_processor_parse_selftest_completed(mcm_module_
     } while (0);
     return return_status;
 }
+
+/**
+ * @brief This function parses the BLE scan completed event data.
+ * @param[in] mcm_module pointer to the mcm module
+ * @param[in] data pointer to the data received
+ * @param[in] len length of the data
+ * @param[out] p_response structure containing the response of the command
+ * @return API_PROCESSOR_SUCCESS if the parsing is successful. If any error
+ * in parsing, returns API_PROCESSOR_ERROR
+ */
+static api_processor_status_t api_processor_parse_bleScan_completed(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+
+    do
+    {   
+        p_response->cmd_response_data.ble_scan_data = data;
+        p_response->cmd_response_data.ble_scan_data_len = len;
+        
+        return_status = API_PROCESSOR_SUCCESS;
+
+    }while (0);
+    return return_status;
+}
+
 static api_processor_status_t api_processor_parse_get_event_seg(mcm_module_hdl_t *mcm_module, uint8_t *data, uint16_t len, api_processor_response_t *p_response)
 {
     api_processor_status_t return_status = API_PROCESSOR_ERROR;
@@ -1166,6 +1199,17 @@ inline uint8_t mcm_helper_get_join_failure_reason(const api_processor_response_t
 uint8_t mcm_helper_get_selftest_result(const api_processor_response_t *res)
 {
     return res->cmd_response_data.self_test_result;
+}
+
+void mcm_helper_get_ble_scan_data(const api_processor_response_t *res, uint8_t *data, uint16_t *len)
+{
+    if( res != NULL && data != NULL && len != NULL)
+    {
+        return;
+    }
+    *len = res->cmd_response_data.ble_scan_data_len;
+    memcpy(data, res->cmd_response_data.ble_scan_data, res->cmd_response_data.ble_scan_data_len);
+   
 }
 
 /******************************************************************************
@@ -3016,4 +3060,34 @@ static api_processor_status_t api_processor_parse_selftest_result_query(mcm_modu
     p_response->cmd_response_data.self_test_result =  data[0];
     TRACE_INFO("Self-Test Result: 0x%02x\n",  data[0]);
     return API_PROCESSOR_SUCCESS;
+}
+
+api_processor_status_t api_processor_cmd_ble_scan_trigger(mcm_module_hdl_t *mcm_module)
+{
+    api_processor_status_t return_status = API_PROCESSOR_ERROR;
+    const uint16_t max_payload_size = 6;
+    do {
+        if (NULL == mcm_module || NULL == mcm_module->h_serial_device.send_data_cb) {
+            TRACE_INFO("MCM module is not initialized\n");
+            break;
+        }
+        memset(mcm_module->u8_send_payload, 0, MAX_SERIAL_SEND_PAYLOAD_SIZE);
+        mcm_module->u8_send_payload[0] = COMMAND_TYPE_GENERAL;
+        mcm_module->u8_send_payload[1] = MROVER_CC_BLE_SCAN_TRIGGER >> 8;
+        mcm_module->u8_send_payload[2] = MROVER_CC_BLE_SCAN_TRIGGER & 0xFF;
+        fp_api_status_t status = fp_append_crc(mcm_module->u8_send_payload, max_payload_size);
+        if (FP_SUCCESS != status) {
+            TRACE_INFO("Failed to append crc\n");
+            break;
+        }
+        uint16_t u16_sent_bytes = mcm_module->h_serial_device.send_data_cb(mcm_module->u8_send_payload, max_payload_size, mcm_module->user_context);
+        if (max_payload_size != u16_sent_bytes) {
+            TRACE_INFO("Failed to send data through serial port\n");
+            return_status = API_PROCESSOR_SERIAL_PORT_ERROR;
+            break;
+        }
+        return_status = API_PROCESSOR_SUCCESS;
+    }while(0);
+
+    return return_status;
 }
