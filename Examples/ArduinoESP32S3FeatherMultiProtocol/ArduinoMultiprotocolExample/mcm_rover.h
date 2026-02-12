@@ -227,6 +227,7 @@ public:
         bool is_ble_scan_data_available = false;
         bool is_ble_scan_data_available();
         void get_ble_scan_data(uint8_t *data, uint16_t *len);
+        size_t query_scanned_ble_data(uint8_t *data);
 };
 
 /**********************************************************************************************************

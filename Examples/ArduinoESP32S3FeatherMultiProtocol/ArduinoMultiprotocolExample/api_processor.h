@@ -940,6 +940,12 @@ api_processor_status_t api_processor_cmd_selftestResultQuery(mcm_module_hdl_t *m
  */
 api_processor_status_t api_processor_cmd_ble_scan_trigger(mcm_module_hdl_t *mcm_module);
 
+/**
+ * @brief Queries the scanned data results from the BLE central scanning
+ * @param mcm_module Pointer to the MCM module structure
+ * @return api_processor_status_t Returns API_PROCESSOR_SUCCESS on success, or an error code
+ */
+api_processor_status_t api_processor_cmd_ble_scanned_data_query(mcm_module_hdl_t *mcm_module);
 /***********************************Helper Functions Prototypes *********************************/
 
 

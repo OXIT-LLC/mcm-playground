@@ -205,6 +205,7 @@ typedef enum{
     MROVER_CC_SELFTEST_RESULT_QUERY                = 0x0103,   // query self test result
     MROVER_CC_SELFTEST_TRIGGER                     = 0x0104,   // trigger self test
     MROVER_CC_BLE_SCAN_TRIGGER                     = 0x010A,   // trigger BLE scan
+    MROVER_CC_QUERY_SCANNED_BLE_DATA               = 0x010B,   // query scanned BLE data
 }mrover_cc_codes_t;
 
 /**

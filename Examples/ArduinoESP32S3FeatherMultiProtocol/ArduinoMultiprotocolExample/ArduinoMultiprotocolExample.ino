@@ -626,12 +626,30 @@ void loop()
     // based on the current state. This function is called repeatedly in the loop function.
     // run_state_machine();
     static bool is_ble_scan_initiated = false;
+    static uint32_t last_ble_scan_time = 0;
     if(!is_ble_scan_initiated)
     {
         Serial.println("Initiating BLE scan...");
         app_trigger_ble_scan();
         is_ble_scan_initiated = true;
+        last_ble_scan_time = millis();
     }
+    if (is_ble_scan_initiated && (millis() - last_ble_scan_time > 1000))
+    {
+        uint8_t buffer[256];
+        uint16_t size = app_query_scanned_ble_data(data);
+        static uint16_t data_rx_count = 0;
+        if(size > 0) { 
+            Serial.printf("Scanned BLE data (size: %d): ", size); 
+            helper_print_hex_array(buffer, size); 
+            data_rx_count += size;
+        }
+        if(data_rx_count >= 1024){
+            last_ble_scan_time = 0xFFFFFFFF;
+        }
+        last_ble_scan_time = millis();
+    }
+    
     // process the events received from MCM
     mcm.handle_rx_events();
 
@@ -1197,4 +1215,8 @@ int app_querySelfTestResult(uint8_t *result){
 int app_trigger_ble_scan(void){
     MCM_STATUS status = mcm.trigger_ble_scan();
     return status != MCM_STATUS::MCM_OK ? -1 : 0;
+}
+
+size_t app_query_scanned_ble_data(uint8_t *data){
+    return mcm.query_scanned_ble_data(data);
 }

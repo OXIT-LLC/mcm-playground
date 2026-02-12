@@ -991,6 +991,11 @@ static void handle_mcm_response(const api_processor_response_t *mcm_response, vo
         curr_instance->self_test_result = mcm_helper_get_selftest_result(mcm_response);
     }
     
+    case MROVER_CC_QUERY_SCANNED_BLE_DATA:
+    {
+        Serial.printf("MROVER_CC_BLE_SCAN_RESULT_QUERY\n");
+        mcm_helper_get_ble_scan_data(mcm_response, curr_instance->ble_scan_data, &curr_instance->ble_scan_data_len);
+    }
     default:
         break;
     }
@@ -1953,4 +1958,25 @@ void MCM::get_ble_scan_data(uint8_t *data, uint16_t *len)
     this->is_ble_scan_data_available = false; // Reset flag after retrieving data
     *len = this->ble_scan_data_len;
     Serial.printf("BLE scan result retrieved: len=%d\n", *len);
+}
+
+size_t MCM:: query_scanned_ble_data(uint8_t *data){
+    Serial.printf("Querying scanned BLE data\n");
+    MCM_STATUS status = MCM_STATUS::MCM_ERROR;
+    api_processor_status_t api_status = API_PROCESSOR_ERROR;
+    size_t data_len = 0;
+    do {
+        _ASSERT_PRINT(data != NULL, "Null pointer provided for scanned BLE data");
+        api_status = api_processor_cmd_ble_scanned_data_query(this->module);
+        _ERROR_BREAK(api_status, "Failed to send scanned BLE data query command");
+
+        this->process_received_data();
+
+        memcpy(data, this->ble_scan_data, this->ble_scan_data_len);
+        data_len = this->ble_scan_data_len;
+        status = MCM_STATUS::MCM_OK;
+        Serial.printf("Successfully requested scanned BLE data: len=%d\n", data_len);
+    } while (0);
+
+    return data_len;
 }
