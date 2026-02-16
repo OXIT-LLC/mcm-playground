@@ -650,7 +650,7 @@ void loop()
         static uint16_t data_rx_count = 0;
         if(size > 0) { 
             Serial.printf("APP: Scanned BLE data (size: %d)\n", size); 
-            // helper_print_hex_array(buffer, size); 
+            helper_print_hex_array(buffer, size); 
             Serial.println("Packet is collected");
             data_rx_count += size;
 

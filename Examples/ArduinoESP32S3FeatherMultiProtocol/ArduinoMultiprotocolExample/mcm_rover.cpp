@@ -1091,23 +1091,14 @@ void MCM::process_received_data()
       this->set_received_size(0);
       this->set_is_rx_received(0);
     } 
-    else 
+     else 
     {
       Serial.printf("HMI RX :(%d bytes) ", this->received_size);
-      for (int i = 0; i < 6/*this->received_size*/; i++) 
+      for (int i = 0; i < this->received_size; i++) 
       {
         Serial.printf("%02x ", temp_buffer[i]);
       }
-      Serial.println("\n");
-
-      for (int i = 6; i < this->received_size-1; i++) 
-      {
-        Serial.printf("%02X ", temp_buffer[i]);
-        if((i-5) % 8 == 0) {
-          Serial.println("");
-        }
-      }
-      Serial.println("\n");
+      Serial.println("");
       api_processor_parse_rx_data(this->module, temp_buffer, this->received_size);  // TODO Oxit: Check if this can print just nothing
     }
 

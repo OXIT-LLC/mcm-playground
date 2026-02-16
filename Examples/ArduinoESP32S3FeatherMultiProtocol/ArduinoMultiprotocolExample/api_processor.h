@@ -256,6 +256,11 @@ typedef struct
     uint32_t timestamp;
 }get_last_dl_stats_t;
 
+typedef struct{
+    uint8_t data[256]; // pointer to the ble scan data
+    uint16_t len; // length of the ble scan data
+}ble_scan_data_t;
+
 /**
  * @brief Structure to hold the command response data
  *
@@ -276,8 +281,9 @@ typedef union
     uint16_t next_uplink_mtu;
     uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
     uint8_t self_test_result; // self test result
-    uint8_t ble_scan_data[256]; // pointer to the ble scan data
-    uint16_t ble_scan_data_len; // length of the ble scan data
+
+    ble_scan_data_t ble_scan_data; // scanned ble data
+    
 } cmd_response_data_t;
 
 /**
