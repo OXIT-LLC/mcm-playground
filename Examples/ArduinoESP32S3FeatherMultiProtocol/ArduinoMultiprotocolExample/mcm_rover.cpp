@@ -1094,11 +1094,20 @@ void MCM::process_received_data()
     else 
     {
       Serial.printf("HMI RX :(%d bytes) ", this->received_size);
-      for (int i = 0; i < this->received_size; i++) 
+      for (int i = 0; i < 6/*this->received_size*/; i++) 
       {
         Serial.printf("%02x ", temp_buffer[i]);
       }
-      Serial.println("");
+      Serial.println("\n");
+
+      for (int i = 6; i < this->received_size-1; i++) 
+      {
+        Serial.printf("%02X ", temp_buffer[i]);
+        if((i-5) % 8 == 0) {
+          Serial.println("");
+        }
+      }
+      Serial.println("\n");
       api_processor_parse_rx_data(this->module, temp_buffer, this->received_size);  // TODO Oxit: Check if this can print just nothing
     }
 
@@ -1945,15 +1954,11 @@ MCM_STATUS MCM::trigger_ble_scan(){
     return status;
 }
 
-bool MCM::is_ble_scan_data_available()
-{
-    return this->is_ble_scan_data_available;
-}
 
 void MCM::get_ble_scan_data(uint8_t *data, uint16_t *len)
 {
+    
     Serial.printf("Retrieving BLE scan result\n");
-    _ASSERT_PRINT(data != NULL, "Null pointer provided for BLE scan result");
     memcpy(data, &this->ble_scan_data, this->ble_scan_data_len);
     this->is_ble_scan_data_available = false; // Reset flag after retrieving data
     *len = this->ble_scan_data_len;
@@ -1966,15 +1971,13 @@ size_t MCM:: query_scanned_ble_data(uint8_t *data){
     api_processor_status_t api_status = API_PROCESSOR_ERROR;
     size_t data_len = 0;
     do {
-        _ASSERT_PRINT(data != NULL, "Null pointer provided for scanned BLE data");
         api_status = api_processor_cmd_ble_scanned_data_query(this->module);
-        _ERROR_BREAK(api_status, "Failed to send scanned BLE data query command");
 
         this->process_received_data();
-
         memcpy(data, this->ble_scan_data, this->ble_scan_data_len);
         data_len = this->ble_scan_data_len;
         status = MCM_STATUS::MCM_OK;
+        this->ble_scan_data_len = 0;
         Serial.printf("Successfully requested scanned BLE data: len=%d\n", data_len);
     } while (0);
 

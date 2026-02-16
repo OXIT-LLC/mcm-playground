@@ -276,7 +276,7 @@ typedef union
     uint16_t next_uplink_mtu;
     uint8_t next_uplink_mtu_protocol; // (optional, for protocol byte)
     uint8_t self_test_result; // self test result
-    uint8_t *ble_scan_data; // pointer to the ble scan data
+    uint8_t ble_scan_data[256]; // pointer to the ble scan data
     uint16_t ble_scan_data_len; // length of the ble scan data
 } cmd_response_data_t;
 

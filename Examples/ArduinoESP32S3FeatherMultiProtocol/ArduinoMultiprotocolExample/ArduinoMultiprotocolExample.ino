@@ -453,10 +453,10 @@ void helper_print_hex_array(const uint8_t *arr, size_t len)
 {
     for (size_t i = 0; i < len; i++) 
     {
-       Serial.printf("0x%02X", arr[i]);
-        if (i != len - 1)
+       Serial.printf("0x%02X ", arr[i]);
+        if (!((i+1) % 8))
        {
-        Serial.printf(",", arr[i]);
+        Serial.println();
        }
     }
     Serial.println();
@@ -502,7 +502,7 @@ void setup()
     Serial.println("Starting setup");
 
     initSPIFFS();
-    
+    #if 0
     pinMode(MCM_EVK_USER_LED, OUTPUT);
     digitalWrite(MCM_EVK_USER_LED, HIGH);   
 
@@ -544,7 +544,7 @@ void setup()
     // Initialize the command line interface application
     // This sets up the command line interface with the application specific commands,.
     init_command_line_app();
-
+#endif
     // Configure button pin with pull-up and attach ISR
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 #ifdef EVK_TYPE_G2R2
@@ -627,25 +627,38 @@ void loop()
     // run_state_machine();
     static bool is_ble_scan_initiated = false;
     static uint32_t last_ble_scan_time = 0;
+    static uint8_t timeout = 0;
+    uint16_t wait4req = 0;
     if(!is_ble_scan_initiated)
     {
         Serial.println("Initiating BLE scan...");
         app_trigger_ble_scan();
         is_ble_scan_initiated = true;
         last_ble_scan_time = millis();
+        timeout = 0;
     }
-    if (is_ble_scan_initiated && (millis() - last_ble_scan_time > 1000))
+    if(timeout > 1){
+        wait4req = 1000;
+    }else{
+        wait4req = 2000;
+    }
+    if (is_ble_scan_initiated && (millis() - last_ble_scan_time > wait4req && timeout < 20))
     {
+        timeout++;
         uint8_t buffer[256];
-        uint16_t size = app_query_scanned_ble_data(data);
+        uint16_t size = app_query_scanned_ble_data(buffer);
         static uint16_t data_rx_count = 0;
         if(size > 0) { 
-            Serial.printf("Scanned BLE data (size: %d): ", size); 
-            helper_print_hex_array(buffer, size); 
+            Serial.printf("APP: Scanned BLE data (size: %d)\n", size); 
+            // helper_print_hex_array(buffer, size); 
+            Serial.println("Packet is collected");
             data_rx_count += size;
+
         }
-        if(data_rx_count >= 1024){
-            last_ble_scan_time = 0xFFFFFFFF;
+        Serial.printf("Total RX data %d timout: %d\n", data_rx_count, timeout);
+        if(data_rx_count >= 1024 || timeout > 20){
+            last_ble_scan_time = 0x7FFFFFFF;
+            timeout = 100;
         }
         last_ble_scan_time = millis();
     }

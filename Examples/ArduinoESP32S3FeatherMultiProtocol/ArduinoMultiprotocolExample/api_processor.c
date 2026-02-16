@@ -597,8 +597,8 @@ static api_processor_status_t api_processor_parse_bleScan_completed(mcm_module_h
 
     do
     {   
-        p_response->cmd_response_data.ble_scan_data = data;
         p_response->cmd_response_data.ble_scan_data_len = len;
+        memcpy(p_response->cmd_response_data.ble_scan_data, data, len);
         
         return_status = API_PROCESSOR_SUCCESS;
 
@@ -1207,7 +1207,7 @@ uint8_t mcm_helper_get_selftest_result(const api_processor_response_t *res)
 
 void mcm_helper_get_ble_scan_data(const api_processor_response_t *res, uint8_t *data, uint16_t *len)
 {
-    if( res != NULL && data != NULL && len != NULL)
+    if( !res && !data && !len)
     {
         return;
     }
@@ -3131,7 +3131,7 @@ static api_processor_status_t api_processor_parse_scanned_ble_data(mcm_module_hd
         TRACE_INFO("Invalid parameters\n");
         return API_PROCESSOR_ERROR;
     }
-    p_response->cmd_response_data.ble_scan_data = data;
+    memcpy(p_response->cmd_response_data.ble_scan_data, data, len);
     p_response->cmd_response_data.ble_scan_data_len = len;
     
     return API_PROCESSOR_SUCCESS;
