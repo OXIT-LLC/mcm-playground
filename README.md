@@ -79,6 +79,7 @@ Any gateway supporting Basic Station or Packet Forwarder:
 - `Examples/` - Sample projects demonstrating core MCM capabilities
   - `ArduinoESP32S3FeatherMultiProtocol/` - Multi-protocol (Amazon Sidewalk CSS + LoRaWAN) example
   - `ArduinoESP32S3FeatherSidewalk/` - Sidewalk-specific (BLE, FSK, CSS) example
+- `Hardware/` - PCB footprint, schematic symbol, and 3D model for board design (Altium)
 - `tools/` - Scripts and utilities for MCM configuration and deployment
 
 ---
