@@ -6,13 +6,10 @@ Hardware design resources for integrating the OxTech MCM (Multi-Connectivity Mod
 
 | Parameter | Value |
 |-----------|-------|
-| **Part Number** | OxTech MCM LK8 |
+| **Part Number** | OxTech MCM Series 0 |
 | **SoC** | Silicon Labs EFR32MG24 |
-| **Radio** | Semtech LR1110 (LoRa + GNSS) |
+| **Radio** | Semtech SX1262 |
 | **Protocols** | LoRaWAN, Amazon Sidewalk (BLE/FSK/CSS), BLE 5.3 |
-| **Dimensions** | 15 mm x 15 mm x 2.5 mm (LGA) |
-| **Pin Count** | 59 pads (LGA) |
-| **Operating Voltage** | 1.8V - 3.6V |
 
 ## Contents
 
@@ -21,9 +18,9 @@ Altium Designer library files for schematic capture and PCB layout.
 
 | File | Description |
 |------|-------------|
-| `MCM-LK8-Schematic.SchLib` | Schematic symbol with all 59 pins |
-| `MCM-LK8-Footprint.PcbLib` | PCB footprint — pad layout, courtyard, and silkscreen |
-| `MCM-LK8-Integrated.LibPkg` | Integrated library package linking symbol and footprint |
+| `MCM-S0-Schematic.SchLib` | Schematic symbol |
+| `MCM-S0-Footprint.PcbLib` | PCB footprint — pad layout, courtyard, and silkscreen |
+| `MCM-S0-Integrated.LibPkg` | Integrated library package linking symbol and footprint |
 
 **Compatibility:** Altium Designer 20 and later.
 
@@ -34,7 +31,7 @@ Altium Designer library files for schematic capture and PCB layout.
 
 | File | Description |
 |------|-------------|
-| `MCM-LK8-3D-Model.step` | 3D model of the MCM LK8 module |
+| `MCM-S0-3D-Model.step` | 3D model of the MCM Series 0 module |
 
 Import into your MCAD tool (SolidWorks, Fusion 360, etc.) or link to the Altium footprint for 3D board visualization.
 
